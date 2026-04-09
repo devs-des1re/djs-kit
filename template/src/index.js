@@ -5,6 +5,7 @@ require('dotenv').config();
 const logger = require('./utils/logger');
 const connectMongo = require('./utils/connectMongo');
 const loadHandlers = require('./utils/loadHandlers');
+const config = require('./config');
 
 const client = new Client({
   intents: [
@@ -20,6 +21,8 @@ client.prefix = new Collection();
 client.buttons = new Collection();
 client.selectMenus = new Collection();
 client.modals = new Collection();
+
+client.config = config
 
 async function initBot() {
   await connectMongo();
