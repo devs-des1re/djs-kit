@@ -1,0 +1,16 @@
+{
+  "name": "djs-kit",
+  "version": "1.0.0",
+  "description": "A discord bot made with discord.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "deploy": "node src/deploy-commands.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.26.2",
+    "dotenv": "^17.4.1",
+    "mongoose": "^9.4.1"
+  }
+}
