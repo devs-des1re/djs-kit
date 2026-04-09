@@ -1,13 +1,13 @@
-# djs-kit
+# @devs_des1re/djs-kit
 
 A command-line interface tool for creating Discord.js v14 bots with a complete project structure, permission system, and MongoDB integration.
 
 ## Badges
 
-![Version](https://img.shields.io/npm/v/djs-kit)
-![Downloads](https://img.shields.io/npm/dm/djs-kit)
-![License](https://img.shields.io/npm/l/djs-kit)
-![Node Version](https://img.shields.io/node/v/djs-kit)
+![Version](https://img.shields.io/npm/v/@devs_des1re/djs-kit)
+![Downloads](https://img.shields.io/npm/dm/@devs_des1re/djs-kit)
+![License](https://img.shields.io/npm/l/@devs_des1re/djs-kit)
+![Node Version](https://img.shields.io/node/v/@devs_des1re/djs-kit)
 ![Discord.js Version](https://img.shields.io/badge/discord.js-v14.26.2-blue)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/devs-des1re/djs-kit/ci.yml)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
@@ -26,7 +26,7 @@ A command-line interface tool for creating Discord.js v14 bots with a complete p
 
 ## Overview
 
-djs-kit is a scaffolding tool that generates a production-ready Discord.js bot project. It creates an organized codebase with support for slash commands, prefix commands, buttons, select menus, modals, and MongoDB database integration. The generated bot includes a built-in permission system that allows you to restrict commands to specific roles or users.
+@devs_des1re/djs-kit is a scaffolding tool that generates a production-ready Discord.js bot project. It creates an organized codebase with support for slash commands, prefix commands, buttons, select menus, modals, and MongoDB database integration. The generated bot includes a built-in permission system that allows you to restrict commands to specific roles or users.
 
 ## Features
 
@@ -50,13 +50,13 @@ The CLI works with npm, yarn, pnpm, and bun. Choose your preferred package manag
 ### Global Installation
 
 ```bash
-npm install -g djs-kit
+npm install -g @devs_des1re/djs-kit
 ```
 
 ### Using npx (No Installation Required)
 
 ```bash
-npx djs-kit create
+npx @devs_des1re/djs-kit create
 ```
 
 ### Verifying Installation
@@ -70,7 +70,7 @@ djs-kit --version
 Create your first Discord bot in four commands:
 
 ```bash
-npx djs-kit create
+npx @devs_des1re/djs-kit create
 cd djs-kit
 npm run deploy
 npm start
