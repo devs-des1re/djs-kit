@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/devs-des1re/djskit/blob/main/docs/public/logo.png" alt="djskit" width="150" />
+  <img src="https://github.com/devs-des1re/djskit/blob/main/docs/public/logo-transparent.png" alt="djskit" width="150" />
   <h1>djskit</h1>
   <p>The fastest and most robust way to start building modern Discord bots with discord.js v14.</p>
 </div>
