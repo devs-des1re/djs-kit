@@ -1,0 +1,68 @@
+---
+title: Getting Started
+description: Welcome to djskit! The ultimate Discord.js v14 scaffolding tool.
+---
+
+Welcome to **djskit**! The fastest and most robust way to start building modern Discord bots with [discord.js v14](https://discord.js.org/).
+
+## Why djskit?
+
+Building a Discord bot from scratch requires a lot of boilerplate: command handlers, event loaders, component routers, state management, and strict TypeScript configurations.
+
+**djskit solves all of this by providing:**
+- **Instant Scaffolding:** Create a fully-functioning bot in seconds with interactive prompts.
+- **Type-Safe Builders:** Chainable, deeply typed builder APIs for commands and components.
+- **Smart State Serialization:** Pass variables between commands and button clicks natively without a database!
+- **Organized Architecture:** A clean, modular folder structure that scales seamlessly.
+- **TypeScript & JavaScript Support:** Choose between strict TS or flexible JS output.
+
+## Quick Start
+
+You can generate a new project using `npx` directly from your terminal:
+
+```bash
+npx djskit create my-discord-bot
+```
+
+The CLI will launch an interactive flow to configure your bot:
+
+1. **Output Language:** Choose TypeScript or JavaScript.
+2. **Bot Token:** Paste your Discord bot token (it validates it in real-time!).
+3. **Client & Guild ID:** Used to register slash commands immediately on startup.
+4. **Scaffolding:** Choose whether to include example commands or start completely bare!
+
+## Directory Structure
+
+Once scaffolded, your project will have a beautifully structured setup:
+
+```text
+my-discord-bot/
+├── src/
+│   ├── builders/        # Type-safe Builder APIs
+│   ├── commands/        # Your Slash & Prefix Commands
+│   ├── components/      # Your Buttons, Modals, and Select Menus
+│   ├── handlers/        # Automated Loaders and Routers
+│   ├── lib/             # Utilities (Logger, Custom ID Serialization)
+│   ├── config.ts        # Type-safe environment config
+│   └── index.ts         # Bot Entry Point
+├── package.json
+└── tsconfig.json        # (If using TypeScript)
+```
+
+## Running Your Bot
+
+To start your bot in development mode, simply run:
+
+```bash
+cd my-discord-bot
+npm run dev
+```
+
+`djskit` comes pre-configured with a **live-reloading development server**. Whenever you make changes to a file or add a new command, your bot will automatically restart and load the new changes instantly!
+
+---
+
+<Cards>
+  <Card title="CLI Reference" href="/docs/cli" />
+  <Card title="Building Commands" href="/docs/commands" />
+</Cards>

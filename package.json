@@ -1,0 +1,35 @@
+{
+  "name": "djskit",
+  "version": "0.1.0",
+  "description": "Scaffold a production-ready discord.js v14 single-guild bot",
+  "type": "module",
+  "bin": {
+    "djskit": "./dist/bin/djskit.js"
+  },
+  "files": [
+    "dist",
+    "src/templates"
+  ],
+  "engines": {
+    "node": ">=20.12.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "sync": "node scripts/sync.js",
+    "build:all": "tsc && npm run sync",
+    "dev": "tsx bin/djskit.ts",
+    "start": "node dist/bin/djskit.js"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.6.0",
+    "commander": "^12.1.0",
+    "discord.js": "^14.0.0",
+    "fast-glob": "^3.3.3",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

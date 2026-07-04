@@ -1,0 +1,81 @@
+---
+title: Commands Guide
+description: Learn how to write powerful, type-safe slash and prefix commands using the djskit Builders.
+---
+
+`djskit` replaces raw discord.js API objects with deeply typed, chainable Builders. This allows you to write commands rapidly with perfect TypeScript autocomplete.
+
+## Slash Commands
+
+Generate a slash command template by running `djskit add command myCommand`. This creates a file at `src/commands/slash/myCommand.ts`.
+
+Slash commands are exported as a default builder from the file:
+
+```typescript
+import { createSlashCommand } from '../../builders/index.js';
+import { ParamType } from '../../builders/types.js';
+
+export default createSlashCommand('echo')
+  .setDescription('Echoes a message back to you')
+  .addParam('message', ParamType.String, { 
+    required: true, 
+    description: 'The message to echo' 
+  })
+  .addParam('uppercase', ParamType.Boolean, {
+    required: false
+  })
+  .setExecute(async (interaction, args) => {
+    // `args` is fully type-safe! 
+    // args.message is `string`
+    // args.uppercase is `boolean | undefined`
+
+    let content = args.message;
+    if (args.uppercase) content = content.toUpperCase();
+
+    await interaction.reply({ content });
+  });
+```
+
+### Type-Safe Arguments
+Whenever you call `.addParam()`, `djskit` injects the parameter name and type into the `args` object inside `.setExecute()`. You never need to call `interaction.options.getString('message')` manually!
+
+## Prefix Commands
+
+Prefix commands operate on classic text messages (e.g. `!say hello`). Generate one by running `djskit add command say --type prefix`.
+
+```typescript
+import { createPrefixCommand } from '../../builders/index.js';
+import { ParamType } from '../../builders/types.js';
+
+export default createPrefixCommand('say')
+  .addParam('channel', ParamType.TextChannel, { required: true })
+  .addParam('message', ParamType.String, { required: true })
+  .setExecute(async (message, args) => {
+    // args.channel is natively resolved to a GuildTextBasedChannel object!
+    // args.message is a string!
+    
+    await args.channel.send({ content: args.message });
+  });
+```
+
+### Argument Parsing
+For prefix commands, `djskit` comes with an internal Argument Parser. It natively handles converting the user's raw text (e.g. `!say #general hello world`) into Discord.js objects. 
+- It resolves `#channel` mentions to `Channel` objects.
+- It resolves `@user` mentions to `User` or `Member` objects.
+- It respects quotation marks for multi-word strings!
+
+## Shared Builder Methods
+
+Both `createSlashCommand` and `createPrefixCommand` share powerful configuration methods:
+
+- **`.setCooldown(seconds: number)`**
+  Applies an automatic user-level cooldown before they can use the command again.
+- **`.setPermissions(perms: PermissionConfig)`**
+  Restricts the command to specific roles or users, or blacklists them.
+
+```typescript
+.setPermissions({
+  allowedRoles: ['123456789012345678'],
+  blacklistedUsers: ['987654321098765432']
+})
+```

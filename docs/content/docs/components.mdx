@@ -1,0 +1,100 @@
+---
+title: Components & State
+description: Build interactive buttons, modals, and select menus with djskit's zero-database state serialization.
+---
+
+Interactivity is what makes a Discord bot feel alive. `djskit` takes the pain out of managing Buttons, Modals, and Select Menus by deeply integrating them into the Builder pattern and solving the "state serialization" problem natively.
+
+## The State Serialization Problem
+
+In standard discord.js, when you send a button, you give it a `customId` string (e.g. `confirm_ban`). When the user clicks the button, your bot receives `confirm_ban` back. 
+
+But what if you need to know *who* they are banning? You'd typically have to stuff that data into the `customId` string manually like `confirm_ban:1234567890`, and then manually split the string later. It gets messy fast.
+
+### The djskit Solution: `.addParam()`
+
+`djskit` components allow you to define exactly what parameters a component expects. It automatically serializes and deserializes the data into the `customId` behind the scenes!
+
+## Buttons
+
+Generate a button snippet by running `djskit add button confirmBan`.
+
+```typescript
+// src/components/buttons/confirmBan.ts
+import { createButton } from '../../builders/index.js';
+import { buildCustomId } from '../../lib/customId.js';
+
+// Usage elsewhere: 
+// const btn = new ButtonBuilder().setCustomId(buildCustomId('confirm_ban', { targetId: '12345' }))
+
+export default createButton('confirm_ban')
+  .addParam('targetId')
+  .setExecute(async (interaction, args) => {
+    // `args` automatically extracts the data from the customId string!
+    // args.targetId is a typed string
+    
+    await interaction.reply({ 
+      content: `User <@${args.targetId}> has been banned!`, 
+      ephemeral: true 
+    });
+  });
+```
+
+Whenever you want to render this button in a command, you just use the `buildCustomId()` helper function to safely pass variables to the button!
+
+## Modals
+
+Generate a modal snippet by running `djskit add modal feedback`.
+
+Modals are slightly different because they take user input rather than predefined parameters. `djskit` allows you to define the text fields using `.addField()`, and then automatically extracts the user's submitted values into an object!
+
+```typescript
+// src/components/modals/feedback.ts
+import { createModal } from '../../builders/index.js';
+import { FieldStyle } from '../../builders/types.js';
+
+export default createModal('feedback_modal')
+  .setTitle('Submit Feedback')
+  .addField('summary', { 
+    label: 'Summary', 
+    style: FieldStyle.Short, 
+    required: true 
+  })
+  .addField('details', { 
+    label: 'Details', 
+    style: FieldStyle.Paragraph, 
+    required: false 
+  })
+  .setExecute(async (interaction, fields) => {
+    // `fields` is fully typed based on your .addField calls!
+    // fields.summary is `string`
+    // fields.details is `string | undefined`
+    
+    await interaction.reply({ 
+      content: `Feedback received! Summary: ${fields.summary}`, 
+      ephemeral: true 
+    });
+  });
+```
+
+## Select Menus
+
+Generate a select menu snippet by running `djskit add select rolePicker`.
+
+```typescript
+// src/components/selects/rolePicker.ts
+import { createSelect } from '../../builders/index.js';
+import { SelectType } from '../../builders/types.js';
+import type { Role } from 'discord.js';
+
+export default createSelect('role_picker', { type: SelectType.Role })
+  .setExecute(async (interaction, values) => {
+    // Since this is a Role select menu, `values` is an array of Role objects!
+    const roles = values as Role[];
+    
+    await interaction.reply({ 
+      content: 'Selected roles: ' + roles.map(r => r.name).join(', '), 
+      ephemeral: true 
+    });
+  });
+```
