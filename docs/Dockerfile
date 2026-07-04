@@ -1,10 +1,17 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
+# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci --ignore-scripts
 
+# Copy the rest of the source code
 COPY . .
+
+# Run postinstall manually now that source files are present
+RUN npm run postinstall
+
+# Build the React Router app
 RUN npm run build
 
 FROM node:20-alpine AS runner
