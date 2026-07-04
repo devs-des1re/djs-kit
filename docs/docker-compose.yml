@@ -1,14 +1,25 @@
 version: '3.8'
-
 services:
   docs:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: djskit-docs
     ports:
-      - "3000:3000"
+      - "3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
     restart: always
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      - "traefik.http.routers.djskit-docs.rule=Host(`djs-kit.devs-des1re.com`)"
+      - "traefik.http.routers.djskit-docs.entrypoints=websecure"
+      - "traefik.http.routers.djskit-docs.tls.certResolver=letsencrypt"
+      - "traefik.http.services.djskit-docs.loadbalancer.server.port=3000"
+
+networks:
+  dokploy-network:
+    external: true
