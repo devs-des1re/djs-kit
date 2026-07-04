@@ -15,7 +15,7 @@ import { log } from '../utils/logger.js';
 import type { CreateOptions } from '../types.js';
 
 export async function createFlow(projectName: string): Promise<CreateOptions> {
-  intro(pc.bold(pc.cyan('djskit')) + pc.dim(' — discord.js bot scaffolder'));
+  intro(pc.bold(pc.cyan('djs-kit')) + pc.dim(' — discord.js bot scaffolder'));
 
   const answers = await group(
     {

@@ -5,8 +5,8 @@ import { handleAdd } from './add.js';
 const program = new Command();
 
 program
-  .name('djskit')
-  .description('Scaffold a production-ready discord.js v14 single-guild bot')
+  .name('djs-kit')
+  .description('CLI to bootstrap and manage a discord.js v14 bot project')
   .version('0.1.0');
 
 program
@@ -22,7 +22,15 @@ program
 
 const addCmd = program
   .command('add')
-  .description('Generate a new command or component file inside a djskit project');
+  .description('Generate a new command or component file inside a djs-kit project');
+
+addCmd.addHelpText('after', `
+Example calls:
+  $ djs-kit create my-bot
+  $ djs-kit add command ping
+  $ djs-kit add button confirm_delete
+  $ djs-kit add command admin/ban --type prefix
+`);
 
 addCmd
   .command('command <name>')

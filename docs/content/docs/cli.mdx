@@ -1,19 +1,19 @@
 ---
 title: CLI Reference
-description: Documentation for the djskit Command Line Interface.
+description: Documentation for the djs-kit Command Line Interface.
 ---
 
-The `djskit` CLI provides commands for scaffolding entirely new bots and generating code snippets for commands and components inside existing bots.
+The `djs-kit` CLI provides commands for scaffolding entirely new bots and generating code snippets for commands and components inside existing bots.
 
-## `djskit create`
+## `djs-kit create`
 
 Generates a brand new discord.js bot project in the specified directory.
 
 ```bash
-djskit create <project-name> [options]
+djs-kit create <project-name> [options]
 ```
 
-By default, if you run `djskit create my-bot`, the CLI will launch an interactive flow to walk you through configuring your bot.
+By default, if you run `djs-kit create my-bot`, the CLI will launch an interactive flow to walk you through configuring your bot.
 
 ### Options (Non-Interactive Mode)
 
@@ -33,18 +33,18 @@ You can bypass the interactive prompt completely by providing flags. This is use
 
 ---
 
-## `djskit add`
+## `djs-kit add`
 
 Generates ready-to-use boilerplate snippets for your bot's features, deeply typed and correctly placed in your project's directory structure!
 
-You must run these commands from *anywhere* inside a valid `djskit` project.
+You must run these commands from *anywhere* inside a valid `djs-kit` project.
 
 ### `add command`
 
 Generates a new command file in `src/commands/`.
 
 ```bash
-djskit add command <name> [--type <slash|prefix>]
+djs-kit add command <name> [--type <slash|prefix>]
 ```
 
 - **`name`**: The name of the command. Can include paths! (e.g., `admin/ban` generates `src/commands/slash/admin/ban.ts`).
@@ -55,7 +55,7 @@ djskit add command <name> [--type <slash|prefix>]
 Generates a new button component in `src/components/buttons/`.
 
 ```bash
-djskit add button <name>
+djs-kit add button <name>
 ```
 
 - **`name`**: Converts the provided name into a snake_case `customId` automatically!
@@ -65,7 +65,7 @@ djskit add button <name>
 Generates a new modal component in `src/components/modals/`.
 
 ```bash
-djskit add modal <name>
+djs-kit add modal <name>
 ```
 
 ### `add select`
@@ -73,5 +73,5 @@ djskit add modal <name>
 Generates a new select menu component in `src/components/selects/`.
 
 ```bash
-djskit add select <name>
+djs-kit add select <name>
 ```

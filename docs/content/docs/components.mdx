@@ -1,9 +1,9 @@
 ---
 title: Components & State
-description: Build interactive buttons, modals, and select menus with djskit's zero-database state serialization.
+description: Build interactive buttons, modals, and select menus with djs-kit's zero-database state serialization.
 ---
 
-Interactivity is what makes a Discord bot feel alive. `djskit` takes the pain out of managing Buttons, Modals, and Select Menus by deeply integrating them into the Builder pattern and solving the "state serialization" problem natively.
+Interactivity is what makes a Discord bot feel alive. `djs-kit` takes the pain out of managing Buttons, Modals, and Select Menus by deeply integrating them into the Builder pattern and solving the "state serialization" problem natively.
 
 ## The State Serialization Problem
 
@@ -11,13 +11,13 @@ In standard discord.js, when you send a button, you give it a `customId` string 
 
 But what if you need to know *who* they are banning? You'd typically have to stuff that data into the `customId` string manually like `confirm_ban:1234567890`, and then manually split the string later. It gets messy fast.
 
-### The djskit Solution: `.addParam()`
+### The djs-kit Solution: `.addParam()`
 
-`djskit` components allow you to define exactly what parameters a component expects. It automatically serializes and deserializes the data into the `customId` behind the scenes!
+`djs-kit` components allow you to define exactly what parameters a component expects. It automatically serializes and deserializes the data into the `customId` behind the scenes!
 
 ## Buttons
 
-Generate a button snippet by running `djskit add button confirmBan`.
+Generate a button snippet by running `djs-kit add button confirmBan`.
 
 ```typescript
 // src/components/buttons/confirmBan.ts
@@ -44,9 +44,9 @@ Whenever you want to render this button in a command, you just use the `buildCus
 
 ## Modals
 
-Generate a modal snippet by running `djskit add modal feedback`.
+Generate a modal snippet by running `djs-kit add modal feedback`.
 
-Modals are slightly different because they take user input rather than predefined parameters. `djskit` allows you to define the text fields using `.addField()`, and then automatically extracts the user's submitted values into an object!
+Modals are slightly different because they take user input rather than predefined parameters. `djs-kit` allows you to define the text fields using `.addField()`, and then automatically extracts the user's submitted values into an object!
 
 ```typescript
 // src/components/modals/feedback.ts
@@ -79,7 +79,7 @@ export default createModal('feedback_modal')
 
 ## Select Menus
 
-Generate a select menu snippet by running `djskit add select rolePicker`.
+Generate a select menu snippet by running `djs-kit add select rolePicker`.
 
 ```typescript
 // src/components/selects/rolePicker.ts
