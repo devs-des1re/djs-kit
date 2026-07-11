@@ -32,6 +32,32 @@ cd my-discord-bot
 npm run dev
 ```
 
+## Database Presets
+
+Choose a storage/database preset at scaffold time:
+
+```bash
+npx @devs-des1re/djs-kit create my-bot --lang ts --guild-id 123456789012345678 --db postgres
+```
+
+Supported presets are `none`, `file`, `sqlite`, `postgres`, `mysql`, `mongo`, and `redis`. SQLite, Postgres, and MySQL generate Drizzle schema/config files plus `db:generate`, `db:migrate`, and `db:studio` scripts.
+
+## Starter Presets
+
+Choose a project preset at scaffold time:
+
+```bash
+npx @devs-des1re/djs-kit create my-bot --lang ts --guild-id 123456789012345678 --preset tickets
+```
+
+Supported presets are:
+
+- `bare`: empty command/component/event folders
+- `utility`: the standard general-purpose starter
+- `moderation`: moderation commands and audit-log examples
+- `tickets`: ticket command, buttons, and modal examples
+- `community`: server info and member join/leave examples
+
 ## CLI Tools
 
 Once your project is scaffolded, `djs-kit` comes with powerful generators to create new features instantly. Run these from anywhere inside your project directory!
@@ -43,6 +69,8 @@ npx @devs-des1re/djs-kit add command <name> [--type slash|prefix]
 ```
 *(Tip: You can use paths like `admin/ban` to auto-organize into folders!)*
 
+Generated projects can run slash-only, prefix-only, or both from `src/config.ts`. Slash commands can be registered to one guild, multiple guilds, or globally.
+
 ### Add Components
 Generates interactive components with built-in State Serialization handling.
 ```bash
@@ -51,9 +79,34 @@ npx @devs-des1re/djs-kit add modal <name>
 npx @devs-des1re/djs-kit add select <name>
 ```
 
-## State Serialization
+### Add Events
+Generates a Discord event listener boilerplate.
+```bash
+npx @devs-des1re/djs-kit add event ready
+npx @devs-des1re/djs-kit add event guildMemberAdd
+```
 
-Managing component state in discord.js usually requires caching IDs to a database. `djs-kit` solves this elegantly via the `.addParam()` API:
+### Add Advanced Interactions
+Generates autocomplete handlers and context menu commands.
+```bash
+npx @devs-des1re/djs-kit add autocomplete ping style
+npx @devs-des1re/djs-kit add context inspectUser --type user
+npx @devs-des1re/djs-kit add context quoteMessage --type message
+```
+
+### Project Tools
+Run these inside a generated djs-kit project:
+```bash
+npx @devs-des1re/djs-kit doctor
+npx @devs-des1re/djs-kit validate
+npx @devs-des1re/djs-kit env
+npx @devs-des1re/djs-kit sync-commands
+npx @devs-des1re/djs-kit upgrade
+```
+
+## Signed Component State
+
+Managing component state in discord.js usually requires caching IDs to a database. `djs-kit` solves this with signed compact custom IDs and the `.addParam()` API:
 
 ```typescript
 // Define what data the button expects
@@ -65,9 +118,41 @@ export default createButton('confirm_ban')
   });
 ```
 
+When building the button, pass state and optional expiry/scope:
+
+```typescript
+buildCustomId('confirm_ban', { targetId }, {
+  expiresIn: 300,
+  userId: interaction.user.id,
+  guildId: interaction.guildId ?? undefined,
+});
+```
+
+The handler verifies the signature and rejects expired or wrongly scoped component interactions automatically.
+
+## Utility Helpers
+
+Generated projects include reusable helpers in `src/lib` for common bot work:
+
+- Safe interaction responses: `safeReply`, `safeEdit`, `safeDefer`, `safeEphemeral`
+- Embed presets: `infoEmbed`, `successEmbed`, `warningEmbed`, `errorEmbed`
+- Button pagination: `paginate`
+- Confirmation prompts: `askForConfirmation`
+- Guards: `guildOnly`, `ownerOnly`, `requireUserPermissions`, `requireBotPermissions`
+- Logging/audit helpers: `sendLog`, `sendModerationAudit`
+
 ## Documentation
 
-The full documentation site contains comprehensive guides on writing commands, structuring your project, and deep dives into the Builder APIs.
+The documentation site contains focused guides for the full generated stack:
+
+- CLI usage, project tools, and generators
+- Slash, prefix, autocomplete, and context menu commands
+- Event loading and runtime safety
+- Buttons, modals, select menus, signed custom IDs, and expirations
+- Database presets, including SQLite/Postgres/MySQL with Drizzle
+- Deployment, permissions, project presets, examples, and migration notes
+
+Start with `docs/content/docs/index.mdx` if you are editing the docs locally.
 
 ---
 

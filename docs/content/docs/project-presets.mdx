@@ -1,0 +1,24 @@
+---
+title: Project Presets
+description: Start from a blank, utility, moderation, tickets, or community bot.
+---
+
+Project presets control which example features are generated.
+
+```bash
+djs-kit create my-bot --lang ts --guild-id 123456789012345678 --preset tickets
+```
+
+| Preset | Includes |
+| --- | --- |
+| `bare` | Empty command, component, autocomplete, and event folders |
+| `utility` | General starter commands, events, and components |
+| `moderation` | Moderation command examples and audit log helpers |
+| `tickets` | Ticket command, buttons, and modal flow |
+| `community` | Server/member info examples and join/leave events |
+
+`--bare` is still supported and maps to `--preset bare`.
+
+## Choosing a Preset
+
+Use `utility` when you want the standard starter. Use `bare` when you already know your structure. Use the domain presets when you want working examples for common bot workflows.

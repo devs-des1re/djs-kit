@@ -23,9 +23,10 @@ You can bypass the interactive prompt completely by providing flags. This is use
 | --- | --- | --- |
 | `--lang <ts\|js>` | Output language. Required to trigger non-interactive mode. | None |
 | `--guild-id <id>` | The Discord guild (server) ID to register slash commands to. | None |
-| `--db <none\|mongo>` | Database backend configuration (currently `none` or `mongo`). | `none` |
+| `--db <none\|file\|sqlite\|postgres\|mysql\|mongo\|redis>` | Database/storage preset. | `none` |
+| `--preset <bare\|utility\|moderation\|tickets\|community>` | Starter feature preset. | `utility` |
 | `--prefix <string>` | The prefix for text commands (e.g. `!`, `?`, `-`). | `!` |
-| `--bare` | Skip generating example commands and components. Gives you a blank slate. | `false` |
+| `--bare` | Alias for `--preset bare`. Gives you a blank slate. | `false` |
 | `--no-install` | Skips running `npm install` after generating the template files. | `false` |
 
 > [!NOTE]
@@ -75,3 +76,48 @@ Generates a new select menu component in `src/components/selects/`.
 ```bash
 djs-kit add select <name>
 ```
+
+### `add event`
+
+Generates an event file in `src/events/`.
+
+```bash
+djs-kit add event <discord-event-name>
+```
+
+### `add autocomplete`
+
+Generates an autocomplete handler for a slash command option.
+
+```bash
+djs-kit add autocomplete <command-name> <option-name>
+```
+
+### `add context`
+
+Generates a user or message context menu command.
+
+```bash
+djs-kit add context <name> --type user
+djs-kit add context <name> --type message
+```
+
+---
+
+## Project Tools
+
+Run these inside a generated project.
+
+```bash
+djs-kit doctor
+djs-kit validate
+djs-kit env
+djs-kit sync-commands
+djs-kit upgrade
+```
+
+- `doctor` checks that the generated project shape is intact.
+- `validate` checks configuration and required environment.
+- `env` prints the environment keys the project expects.
+- `sync-commands` registers slash and context commands without starting the bot.
+- `upgrade` inspects readiness for newer template features.

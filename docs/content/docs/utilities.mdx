@@ -1,0 +1,49 @@
+---
+title: Utilities
+description: Reusable helpers for responses, embeds, pagination, confirmations, guards, and logs.
+---
+
+Generated projects include a small `src/lib` toolbox for common Discord bot work.
+
+## Safe Responses
+
+Use response helpers when a command might already be deferred or replied to.
+
+```typescript
+import { safeReply } from '../../lib/responses.js';
+
+await safeReply(interaction, {
+  content: 'Done.',
+  ephemeral: true,
+});
+```
+
+## Embeds
+
+```typescript
+import { successEmbed, errorEmbed } from '../../lib/embeds.js';
+
+await interaction.reply({
+  embeds: [successEmbed('Ticket created')],
+  ephemeral: true,
+});
+```
+
+## Pagination and Confirmation
+
+`paginate` creates scoped navigation buttons. `askForConfirmation` creates a short-lived confirm/cancel prompt. Both use signed custom IDs so other users cannot press someone else's controls.
+
+## Guards
+
+Use guards to keep command checks consistent.
+
+```typescript
+import { ownerOnly, requireUserPermissions } from '../../lib/guards.js';
+
+ownerOnly(interaction.user.id);
+requireUserPermissions(interaction.memberPermissions, ['BanMembers']);
+```
+
+## Logging
+
+`sendLog` and `sendModerationAudit` send structured messages to configured logging channels. Configure channel IDs in `.env`, then use the helpers from commands and events.

@@ -1,10 +1,16 @@
 import { cp, readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
+import { basename, join } from 'path';
 import fg from 'fast-glob';
 
 /** Recursively copy a directory */
 export async function copyDir(src: string, dest: string): Promise<void> {
-  await cp(src, dest, { recursive: true });
+  await cp(src, dest, {
+    recursive: true,
+    filter: (source) => {
+      const name = basename(source);
+      return name !== 'node_modules' && name !== 'dist';
+    },
+  });
 }
 
 /** Replace __DJSKIT_KEY__ tokens in a file */

@@ -1,3 +1,16 @@
 {
-  "pages": ["index", "cli", "commands", "components"]
+  "pages": [
+    "index",
+    "cli",
+    "commands",
+    "events",
+    "components",
+    "database-presets",
+    "project-presets",
+    "utilities",
+    "security",
+    "deployment",
+    "examples",
+    "migration"
+  ]
 }

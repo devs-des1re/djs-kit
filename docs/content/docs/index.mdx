@@ -12,7 +12,9 @@ Building a Discord bot from scratch requires a lot of boilerplate: command handl
 **djs-kit solves all of this by providing:**
 - **Instant Scaffolding:** Create a fully-functioning bot in seconds with interactive prompts.
 - **Type-Safe Builders:** Chainable, deeply typed builder APIs for commands and components.
-- **Smart State Serialization:** Pass variables between commands and button clicks natively without a database!
+- **Signed Component State:** Pass variables between commands and components with expiring, scoped custom IDs.
+- **Event Loader:** Keep Discord events in their own folder, loaded automatically.
+- **Database Presets:** Choose memory, file, SQLite, Postgres, MySQL, MongoDB, or Redis.
 - **Organized Architecture:** A clean, modular folder structure that scales seamlessly.
 - **TypeScript & JavaScript Support:** Choose between strict TS or flexible JS output.
 
@@ -28,8 +30,9 @@ The CLI will launch an interactive flow to configure your bot:
 
 1. **Output Language:** Choose TypeScript or JavaScript.
 2. **Bot Token:** Paste your Discord bot token (it validates it in real-time!).
-3. **Client & Guild ID:** Used to register slash commands immediately on startup.
-4. **Scaffolding:** Choose whether to include example commands or start completely bare!
+3. **Client & Guild IDs:** Used to register slash commands immediately on startup.
+4. **Database Preset:** Choose how cooldowns and storage should be scaffolded.
+5. **Project Preset:** Start bare or generate utility, moderation, tickets, or community examples.
 
 ## Directory Structure
 
@@ -39,11 +42,14 @@ Once scaffolded, your project will have a beautifully structured setup:
 my-discord-bot/
 ├── src/
 │   ├── builders/        # Type-safe Builder APIs
+│   ├── autocomplete/    # Autocomplete handlers
 │   ├── commands/        # Your Slash & Prefix Commands
 │   ├── components/      # Your Buttons, Modals, and Select Menus
+│   ├── context/         # User and message context menus
+│   ├── events/          # Discord client events
 │   ├── handlers/        # Automated Loaders and Routers
-│   ├── lib/             # Utilities (Logger, Custom ID Serialization)
-│   ├── config.ts        # Type-safe environment config
+│   ├── lib/             # Utilities, logging, responses, custom IDs
+│   ├── config.ts        # Bot behavior config
 │   └── index.ts         # Bot Entry Point
 ├── package.json
 └── tsconfig.json        # (If using TypeScript)
@@ -65,4 +71,8 @@ npm run dev
 <Cards>
   <Card title="CLI Reference" href="/docs/cli" />
   <Card title="Building Commands" href="/docs/commands" />
+  <Card title="Events Guide" href="/docs/events" />
+  <Card title="Components & State" href="/docs/components" />
+  <Card title="Database Presets" href="/docs/database-presets" />
+  <Card title="Examples" href="/docs/examples" />
 </Cards>

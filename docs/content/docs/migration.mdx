@@ -1,0 +1,54 @@
+---
+title: Migration Guide
+description: Upgrade older generated bots to the current djs-kit layout.
+---
+
+Older generated projects can keep their commands, but the current template has a few new conventions.
+
+## Configuration
+
+Move normal behavior into `src/config.ts`:
+
+- `prefix`
+- `cooldownBackend`
+- `commandMode`
+- `commandRegistration`
+
+Keep secrets and deployment-specific values in `.env`:
+
+- `DISCORD_TOKEN`
+- `DISCORD_CLIENT_ID`
+- `DISCORD_GUILD_IDS`
+- `DATABASE_URL`
+- `DJSKIT_COMPONENT_SECRET`
+
+## Commands
+
+Slash commands now support categories, examples, autocomplete handlers, context menu commands, and `default_member_permissions`. Prefix commands support aliases and generated help output.
+
+Run:
+
+```bash
+djs-kit upgrade
+djs-kit doctor
+```
+
+Then compare your command files with newly generated examples.
+
+## Components
+
+Replace hand-built colon-separated custom IDs with `buildCustomId`.
+
+```typescript
+buildCustomId('confirm_delete', { itemId }, { expiresIn: 300, userId });
+```
+
+Legacy unsigned custom IDs are only for migration/testing. New components should use signed IDs.
+
+## Events
+
+Move client listeners into `src/events` and export them with `createEvent`. This keeps startup code small and makes events load the same way commands and components do.
+
+## Databases
+
+New projects can be created with `--db`. Existing projects can add the generated DB files manually or start from a fresh project and copy commands/components over.

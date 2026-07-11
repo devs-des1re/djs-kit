@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises';
+import { access, writeFile, mkdir } from 'fs/promises';
 import { join, dirname, basename } from 'path';
 import fg from 'fast-glob';
 import { log } from '../../utils/logger.js';
@@ -16,7 +16,12 @@ function tsTemplate(customId: string, nameWithPath: string): string {
   return `import { createButton } from '${builders}/index.js';
 import { buildCustomId } from '${lib}/customId.js';
 
-// Usage elsewhere: new ButtonBuilder().setCustomId(buildCustomId('${customId}', { /* args */ }))
+// Usage elsewhere:
+// new ButtonBuilder().setCustomId(buildCustomId('${customId}', { userId: interaction.user.id }, {
+//   expiresIn: 300,
+//   userId: interaction.user.id,
+//   guildId: interaction.guildId ?? undefined,
+// }))
 export default createButton('${customId}')
   // .addParam('userId')
   // .addParam('itemId')
@@ -33,6 +38,7 @@ function jsTemplate(customId: string, nameWithPath: string): string {
   return `import { createButton } from '${builders}/index.js';
 import { buildCustomId } from '${lib}/customId.js';
 
+// Usage elsewhere: buildCustomId('${customId}', {}, { expiresIn: 300 })
 export default createButton('${customId}')
   .setExecute(async (interaction, args) => {
     await interaction.reply({ content: 'Button clicked!', ephemeral: true });
@@ -52,6 +58,18 @@ export async function generateButtonSnippet(
   const typeDir = join(projectRoot, 'src', 'components', 'buttons');
   const targetDir = join(typeDir, dirname(nameWithPath));
   const filePath = join(targetDir, `${buttonName}.${ext}`);
+
+  let fileExists = false;
+  try {
+    await access(filePath);
+    fileExists = true;
+  } catch {
+    // File does not exist, which is what we want.
+  }
+  if (fileExists) {
+    log.error(`Refusing to overwrite existing file: src/components/buttons/${nameWithPath}.${ext}`);
+    process.exit(1);
+  }
 
   const existing = await fg(`**/${buttonName}.${ext}`, {
     cwd: typeDir.replace(/\\/g, '/'),

@@ -3,17 +3,17 @@ title: Components & State
 description: Build interactive buttons, modals, and select menus with djs-kit's zero-database state serialization.
 ---
 
-Interactivity is what makes a Discord bot feel alive. `djs-kit` takes the pain out of managing Buttons, Modals, and Select Menus by deeply integrating them into the Builder pattern and solving the "state serialization" problem natively.
+Interactivity is what makes a Discord bot feel alive. `djs-kit` takes the pain out of managing buttons, modals, and select menus by deeply integrating them into the builder pattern and solving component state with signed custom IDs.
 
 ## The State Serialization Problem
 
-In standard discord.js, when you send a button, you give it a `customId` string (e.g. `confirm_ban`). When the user clicks the button, your bot receives `confirm_ban` back. 
+In standard discord.js, when you send a button, you give it a `customId` string (e.g. `confirm_ban`). When the user clicks the button, your bot receives `confirm_ban` back.
 
 But what if you need to know *who* they are banning? You'd typically have to stuff that data into the `customId` string manually like `confirm_ban:1234567890`, and then manually split the string later. It gets messy fast.
 
-### The djs-kit Solution: `.addParam()`
+### The djs-kit Solution: `.addParam()` and Signing
 
-`djs-kit` components allow you to define exactly what parameters a component expects. It automatically serializes and deserializes the data into the `customId` behind the scenes!
+`djs-kit` components allow you to define exactly what parameters a component expects. It serializes the data into the `customId`, signs it, and verifies it before your handler runs.
 
 ## Buttons
 
@@ -24,8 +24,10 @@ Generate a button snippet by running `djs-kit add button confirmBan`.
 import { createButton } from '../../builders/index.js';
 import { buildCustomId } from '../../lib/customId.js';
 
-// Usage elsewhere: 
-// const btn = new ButtonBuilder().setCustomId(buildCustomId('confirm_ban', { targetId: '12345' }))
+// Usage elsewhere:
+// const btn = new ButtonBuilder().setCustomId(
+//   buildCustomId('confirm_ban', { targetId: '12345' }, { expiresIn: 300 })
+// )
 
 export default createButton('confirm_ban')
   .addParam('targetId')
@@ -40,7 +42,7 @@ export default createButton('confirm_ban')
   });
 ```
 
-Whenever you want to render this button in a command, you just use the `buildCustomId()` helper function to safely pass variables to the button!
+Whenever you render this button in a command, use `buildCustomId()` to pass variables to the button safely. You can also scope the ID to a user or guild.
 
 ## Modals
 
@@ -77,6 +79,8 @@ export default createModal('feedback_modal')
   });
 ```
 
+Modal builders can also generate the modal UI, so the field definitions and submitted values stay in one file.
+
 ## Select Menus
 
 Generate a select menu snippet by running `djs-kit add select rolePicker`.
@@ -98,3 +102,5 @@ export default createSelect('role_picker', { type: SelectType.Role })
     });
   });
 ```
+
+Select builders support string, user, role, channel, and mentionable selects. Typed values are resolved before your handler runs wherever Discord provides resolved data.

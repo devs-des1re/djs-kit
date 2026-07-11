@@ -1,0 +1,47 @@
+---
+title: Security and Custom IDs
+description: Use signed component state, expirations, scopes, and native Discord permissions.
+---
+
+Discord component `customId` values come back from the client, so they should be treated as user-controlled input. `djs-kit` signs generated custom IDs and verifies them before handlers run.
+
+## Signed Component State
+
+```typescript
+import { buildCustomId } from '../../lib/customId.js';
+
+const customId = buildCustomId(
+  'confirm_delete',
+  { itemId: 'abc123' },
+  {
+    expiresIn: 300,
+    userId: interaction.user.id,
+    guildId: interaction.guildId ?? undefined,
+  },
+);
+```
+
+The component router rejects invalid signatures, expired IDs, and IDs used by the wrong user or guild.
+
+## Signing Key
+
+Generated projects use `DJSKIT_COMPONENT_SECRET` when provided. If it is missing, they fall back to `DISCORD_TOKEN`.
+
+```bash
+DJSKIT_COMPONENT_SECRET=change-this-long-random-value
+```
+
+Use a dedicated signing secret in production so rotating your bot token does not also rotate component state.
+
+## Discord-Native Permissions
+
+Slash and context commands can use Discord's native `default_member_permissions`.
+
+```typescript
+import { PermissionFlagsBits } from 'discord.js';
+
+export default createSlashCommand('ban')
+  .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
+```
+
+For runtime checks, use guards such as `ownerOnly`, `devOnly`, `requireUserPermissions`, and `requireBotPermissions`.

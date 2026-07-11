@@ -14,7 +14,8 @@
   },
   "include": [
     "src",
-    "bin"
+    "bin",
+    "tests"
   ],
   "exclude": [
     "src/templates",

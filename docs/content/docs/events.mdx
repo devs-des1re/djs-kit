@@ -1,0 +1,49 @@
+---
+title: Events Guide
+description: Load Discord.js events with the same folder-first style as commands and components.
+---
+
+Events live in `src/events` and are loaded automatically by the event loader. Each event exports a builder created with `createEvent`.
+
+```typescript
+import { Events } from 'discord.js';
+import { createEvent } from '../builders/index.js';
+import { logger } from '../lib/logger.js';
+
+export default createEvent(Events.GuildMemberAdd)
+  .setExecute(async (member) => {
+    logger.info(`${member.user.tag} joined ${member.guild.name}`);
+  });
+```
+
+## Generate an Event
+
+```bash
+djs-kit add event guildMemberAdd
+djs-kit add event messageDelete
+```
+
+Generated events are placed in `src/events`. You can use any Discord.js client event, including `ready`, `guildMemberAdd`, `messageDelete`, `interactionCreate`, and shard lifecycle events.
+
+## Loader Behavior
+
+The loader imports every event file and registers the listener on the client. Use `.setOnce(true)` for events that should run only once.
+
+```typescript
+export default createEvent(Events.ClientReady)
+  .setOnce(true)
+  .setExecute(async (client) => {
+    logger.info(`Logged in as ${client.user.tag}`);
+  });
+```
+
+## Startup and Runtime Safety
+
+Generated projects also include global runtime handling for:
+
+- `unhandledRejection`
+- `uncaughtException`
+- shard errors and disconnects
+- graceful shutdown on process signals
+
+Use events for Discord behavior, and keep process-level safety in `src/lib/runtime.ts`.

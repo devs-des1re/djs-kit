@@ -1,0 +1,47 @@
+---
+title: Deployment
+description: Prepare a generated bot for development, staging, and production.
+---
+
+## Environment
+
+Use `.env` for secrets and deployment-specific IDs.
+
+```bash
+DISCORD_TOKEN=...
+DISCORD_CLIENT_ID=...
+DISCORD_GUILD_IDS=123456789012345678,234567890123456789
+DATABASE_URL=...
+DJSKIT_COMPONENT_SECRET=...
+LOG_CHANNEL_ID=...
+MOD_AUDIT_CHANNEL_ID=...
+```
+
+Use `src/config.ts` for normal behavior such as prefix, command mode, command registration target, and cooldown backend.
+
+## Slash Command Registration
+
+Generated projects can register slash commands to one guild, multiple guilds, or globally.
+
+```typescript
+export const config = {
+  commandRegistration: 'guild',
+  guildIds: ['123456789012345678'],
+};
+```
+
+Use guild registration while developing because updates appear quickly. Use global registration for public bots when commands are stable.
+
+## Validate Before Deploying
+
+```bash
+djs-kit doctor
+djs-kit validate
+djs-kit sync-commands
+```
+
+`doctor` checks project shape, `validate` checks configuration, and `sync-commands` registers slash commands without starting the bot.
+
+## Graceful Shutdown
+
+The generated runtime listens for process signals, logs shutdown, and destroys the Discord client. This helps process managers and hosts stop the bot cleanly.

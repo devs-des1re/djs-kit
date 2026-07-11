@@ -1,13 +1,15 @@
-import { resolve, join } from 'path';
-import { access } from 'fs/promises';
 import { createFlow } from '../prompts/createFlow.js';
 import { generateProject } from '../generators/project.js';
 import { log } from '../utils/logger.js';
+import { isValidNpmName } from '../utils/validate.js';
+import { isDatabasePreset } from '../utils/dbPresets.js';
+import { isProjectPreset } from '../utils/projectPresets.js';
 import type { CreateOptions } from '../types.js';
 
 interface CreateCliOptions {
   lang?: string;
   db?: string;
+  preset?: string;
   guildId?: string;
   prefix?: string;
   bare?: boolean;
@@ -18,6 +20,11 @@ export async function handleCreate(
   projectName: string,
   options: CreateCliOptions
 ): Promise<void> {
+  if (!isValidNpmName(projectName)) {
+    log.error(`Invalid project name "${projectName}". Use a valid npm package name, such as "my-discord-bot".`);
+    process.exit(1);
+  }
+
   let opts: CreateOptions;
 
   if (!options.lang) {
@@ -44,9 +51,15 @@ export async function handleCreate(
       log.info('Set DISCORD_TOKEN in your environment before running, or run interactively.');
     }
 
-    const db = (options.db ?? 'none') as 'none' | 'mongo';
-    if (db !== 'none' && db !== 'mongo') {
-      log.error(`Invalid --db "${options.db}". Must be "none" or "mongo".`);
+    const db = options.db ?? 'none';
+    if (!isDatabasePreset(db)) {
+      log.error(`Invalid --db "${options.db}". Must be one of: none, file, sqlite, postgres, mysql, mongo, redis.`);
+      process.exit(1);
+    }
+
+    const preset = options.bare ? 'bare' : (options.preset ?? 'utility');
+    if (!isProjectPreset(preset)) {
+      log.error(`Invalid --preset "${options.preset}". Must be one of: bare, utility, moderation, tickets, community.`);
       process.exit(1);
     }
 
@@ -54,11 +67,12 @@ export async function handleCreate(
       name: projectName,
       lang,
       db,
+      preset,
       guildId: options.guildId,
       clientId,
       token,
       prefix: options.prefix ?? '!',
-      bare: options.bare ?? false,
+      bare: preset === 'bare',
       install: options.install ?? true,
     };
   }
