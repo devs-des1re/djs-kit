@@ -2,13 +2,46 @@ import { Events } from 'discord.js';
 import { parseCustomId } from '../lib/customId.js';
 import { checkPermissions } from '../lib/permissions.js';
 import { SelectType } from '../builders/types.js';
+import { logger } from '../lib/logger.js';
+async function rejectInvalidState(interaction, parsed) {
+    if (parsed.valid)
+        return false;
+    if (interaction.isRepliable()) {
+        await interaction.reply({
+            content: parsed.reason ?? 'This component state is invalid.',
+            ephemeral: true,
+        }).catch(() => { });
+    }
+    return true;
+}
 export function registerComponentHandler(client) {
     client.on(Events.InteractionCreate, async (interaction) => {
         if (!interaction.inGuild())
             return;
         try {
-            if (interaction.isButton()) {
-                const { base, params } = parseCustomId(interaction.customId);
+            if (interaction.isUserContextMenuCommand() || interaction.isMessageContextMenuCommand()) {
+                const desc = client.contextMenus.get(interaction.commandName);
+                if (!desc)
+                    return;
+                const member = await interaction.guild?.members.fetch(interaction.user.id);
+                if (member && !checkPermissions(member, desc.permissions).allowed) {
+                    await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+                    return;
+                }
+                if (desc.execute) {
+                    const target = interaction.isUserContextMenuCommand()
+                        ? interaction.targetUser
+                        : interaction.targetMessage;
+                    await desc.execute(interaction, target);
+                }
+            }
+            else if (interaction.isButton()) {
+                const { base, params, ...parsed } = parseCustomId(interaction.customId, {
+                    userId: interaction.user.id,
+                    guildId: interaction.guildId,
+                });
+                if (await rejectInvalidState(interaction, { base, params, ...parsed }))
+                    return;
                 const desc = client.buttons.get(base);
                 if (!desc)
                     return;
@@ -23,7 +56,13 @@ export function registerComponentHandler(client) {
                     await desc.execute(interaction, args);
             }
             else if (interaction.isModalSubmit()) {
-                const { base } = parseCustomId(interaction.customId);
+                const parsed = parseCustomId(interaction.customId, {
+                    userId: interaction.user.id,
+                    guildId: interaction.guildId,
+                });
+                if (await rejectInvalidState(interaction, parsed))
+                    return;
+                const { base } = parsed;
                 const desc = client.modals.get(base);
                 if (!desc)
                     return;
@@ -50,7 +89,12 @@ export function registerComponentHandler(client) {
                     await desc.execute(interaction, args);
             }
             else if (interaction.isAnySelectMenu()) {
-                const { base, params } = parseCustomId(interaction.customId);
+                const { base, params, ...parsed } = parseCustomId(interaction.customId, {
+                    userId: interaction.user.id,
+                    guildId: interaction.guildId,
+                });
+                if (await rejectInvalidState(interaction, { base, params, ...parsed }))
+                    return;
                 const desc = client.selects.get(base);
                 if (!desc)
                     return;
@@ -81,7 +125,7 @@ export function registerComponentHandler(client) {
         }
         catch (err) {
             const cid = 'customId' in interaction ? interaction.customId : 'unknown';
-            console.error(`Error executing component ${cid}:`, err);
+            logger.error(`Error executing component ${cid}.`, err);
             const msg = { content: 'There was an error while executing this component!', ephemeral: true };
             if (interaction.isRepliable() && (interaction.replied || interaction.deferred))
                 await interaction.followUp(msg).catch(() => { });

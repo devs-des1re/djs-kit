@@ -3,20 +3,71 @@ import { config } from '../config.js';
 import { checkPermissions } from '../lib/permissions.js';
 import { createCooldownStore } from '../lib/cooldowns.js';
 import { parseArgs } from '../lib/argParser.js';
+import { logger } from '../lib/logger.js';
 
-const cooldowns = createCooldownStore(config.cooldownBackend);
+const cooldowns = await createCooldownStore(config.cooldownBackend);
+
+function checkCommandAccess(userId: string, guildId: string | null, permissions = {}) {
+  const perms = permissions as { ownerOnly?: boolean; devOnly?: boolean };
+
+  if (perms.ownerOnly && !config.ownerIds.includes(userId)) {
+    return { allowed: false, reason: 'Bot owner only' };
+  }
+
+  if (perms.devOnly && guildId && !config.devGuildIds.includes(guildId)) {
+    return { allowed: false, reason: 'Development server only' };
+  }
+
+  return { allowed: true, reason: null };
+}
 
 export function registerCommandHandler(client: Client): void {
-  // --- SLASH COMMANDS ---
   client.on(Events.InteractionCreate, async (interaction) => {
+    if (!interaction.isAutocomplete()) return;
+
+    const focused = interaction.options.getFocused(true);
+    const handler = client.autocompleteHandlers.get(`${interaction.commandName}:${focused.name}`);
+    if (!handler?.execute) return;
+
+    try {
+      await handler.execute(interaction);
+    } catch (err) {
+      logger.error(`Error executing autocomplete for ${interaction.commandName}:${focused.name}.`, err);
+    }
+  });
+
+  // --- SLASH COMMANDS ---
+  if (config.commandMode !== 'prefix') client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
     if (!interaction.inGuild()) return;
 
-    const desc = client.slashCommands.get(interaction.commandName);
-    if (!desc) return;
+    const parentDesc = client.slashCommands.get(interaction.commandName);
+    if (!parentDesc) return;
 
     try {
+      const subcommandName = parentDesc.subcommands.length > 0
+        ? interaction.options.getSubcommand(false)
+        : null;
+      const subcommandDesc = subcommandName
+        ? parentDesc.subcommands.find(sub => sub.name === subcommandName)
+        : null;
+      const desc = subcommandDesc
+        ? {
+            ...parentDesc,
+            ...subcommandDesc,
+            name: parentDesc.name,
+            permissions: subcommandDesc.permissions ?? parentDesc.permissions,
+            cooldown: subcommandDesc.cooldown ?? parentDesc.cooldown,
+          }
+        : parentDesc;
+
       const member = await interaction.guild?.members.fetch(interaction.user.id);
+      const accessCheck = checkCommandAccess(interaction.user.id, interaction.guildId, desc.permissions);
+      if (!accessCheck.allowed) {
+        await interaction.reply({ content: `You don't have permission to use this command. (${accessCheck.reason})`, ephemeral: true });
+        return;
+      }
+
       if (member) {
         const permCheck = checkPermissions(member, desc.permissions);
         if (!permCheck.allowed) {
@@ -26,12 +77,13 @@ export function registerCommandHandler(client: Client): void {
       }
 
       if (desc.cooldown) {
-        const msLeft = await cooldowns.check(desc.name, interaction.user.id);
+        const cooldownKey = subcommandName ? `${parentDesc.name}.${subcommandName}` : parentDesc.name;
+        const msLeft = await cooldowns.check(cooldownKey, interaction.user.id);
         if (msLeft) {
           await interaction.reply({ content: `Please wait ${(msLeft / 1000).toFixed(1)}s before using this command again.`, ephemeral: true });
           return;
         }
-        await cooldowns.set(desc.name, interaction.user.id, desc.cooldown * 1000);
+        await cooldowns.set(cooldownKey, interaction.user.id, desc.cooldown * 1000);
       }
 
       const args: Record<string, unknown> = {};
@@ -57,7 +109,7 @@ export function registerCommandHandler(client: Client): void {
         await interaction.reply({ content: 'Command logic not implemented.', ephemeral: true });
       }
     } catch (err) {
-      console.error(`Error executing slash command ${desc.name}:`, err);
+      logger.error(`Error executing slash command ${parentDesc.name}.`, err);
       const msg = { content: 'There was an error while executing this command!', ephemeral: true };
       if (interaction.replied || interaction.deferred) await interaction.followUp(msg).catch(() => {});
       else await interaction.reply(msg).catch(() => {});
@@ -65,7 +117,7 @@ export function registerCommandHandler(client: Client): void {
   });
 
   // --- PREFIX COMMANDS ---
-  client.on(Events.MessageCreate, async (message) => {
+  if (config.commandMode !== 'slash') client.on(Events.MessageCreate, async (message) => {
     if (message.author.bot || !message.guild) return;
     if (!message.content.startsWith(config.prefix)) return;
 
@@ -79,15 +131,23 @@ export function registerCommandHandler(client: Client): void {
     try {
       let desc = parentDesc;
       let usedSubcommand = false;
+      let usedSubcommandName: string | null = null;
 
       if (parentDesc.subcommands.length > 0 && args.length > 0) {
         const subName = args[0].toLowerCase();
         const sub = parentDesc.subcommands.find(s => s.name === subName);
         if (sub) {
-          desc = { ...parentDesc, ...sub, permissions: sub.permissions ?? parentDesc.permissions };
+          desc = { ...parentDesc, ...sub, name: parentDesc.name, permissions: sub.permissions ?? parentDesc.permissions, cooldown: sub.cooldown ?? parentDesc.cooldown };
           args.shift(); // remove subcommand name
           usedSubcommand = true;
+          usedSubcommandName = sub.name;
         }
+      }
+
+      const accessCheck = checkCommandAccess(message.author.id, message.guildId, desc.permissions);
+      if (!accessCheck.allowed) {
+        await message.reply(`You don't have permission to use this command. (${accessCheck.reason})`);
+        return;
       }
 
       const permCheck = checkPermissions(message.member!, desc.permissions);
@@ -97,7 +157,7 @@ export function registerCommandHandler(client: Client): void {
       }
 
       if (desc.cooldown) {
-        const key = usedSubcommand ? `${desc.name}.${args[0]}` : desc.name; // approx for subcmd key
+        const key = usedSubcommandName ? `${parentDesc.name}.${usedSubcommandName}` : parentDesc.name;
         const msLeft = await cooldowns.check(key, message.author.id);
         if (msLeft) {
           await message.reply(`Please wait ${(msLeft / 1000).toFixed(1)}s before using this command again.`);
@@ -116,7 +176,7 @@ export function registerCommandHandler(client: Client): void {
         await message.reply('Command logic not implemented.');
       }
     } catch (err) {
-      console.error(`Error executing prefix command ${parentDesc.name}:`, err);
+      logger.error(`Error executing prefix command ${parentDesc.name}.`, err);
       await message.reply('There was an error while executing this command!').catch(() => {});
     }
   });

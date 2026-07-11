@@ -1,13 +1,24 @@
 import { fileURLToPath } from 'url';
 import { dirname, join, resolve } from 'path';
 import { access } from 'fs/promises';
+import { existsSync } from 'fs';
 
 /** Absolute path to the djskit package root (where package.json lives) */
 export function getPackageRoot(): string {
   const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
-  // Both dist/src/utils/paths.js and src/utils/paths.ts go up 3 levels to find root
-  return join(__dirname, '..', '..', '..');
+  let dir = dirname(__filename);
+
+  while (true) {
+    if (existsSync(join(dir, 'package.json')) && existsSync(join(dir, 'src', 'templates'))) {
+      return dir;
+    }
+
+    const parent = dirname(dir);
+    if (parent === dir) {
+      throw new Error('Unable to locate djs-kit package root.');
+    }
+    dir = parent;
+  }
 }
 
 /** Get the templates directory for the given language */

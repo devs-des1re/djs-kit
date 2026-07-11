@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join, dirname } from 'path';
+import { logger } from './logger.js';
 class InMemoryCooldownStore {
     store = new Map();
     key(commandName, userId) {
@@ -56,7 +57,7 @@ class FileCooldownStore {
                 await writeFile(this.dataFile, JSON.stringify(this.store || {}), 'utf-8');
             }
             catch (err) {
-                console.error('Failed to save cooldowns:', err);
+                logger.error('Failed to save cooldowns.', err);
             }
         }, 1000); // Debounce saves
     }
@@ -81,6 +82,15 @@ class FileCooldownStore {
         this.scheduleSave();
     }
 }
-export function createCooldownStore(backend) {
-    return backend === 'file' ? new FileCooldownStore() : new InMemoryCooldownStore();
+async function loadDatabaseCooldownStore() {
+    const importer = new Function('path', 'return import(path)');
+    const mod = await importer('../db/cooldowns.js');
+    return mod.createDatabaseCooldownStore();
+}
+export async function createCooldownStore(backend) {
+    if (backend === 'file')
+        return new FileCooldownStore();
+    if (backend === 'memory')
+        return new InMemoryCooldownStore();
+    return loadDatabaseCooldownStore();
 }

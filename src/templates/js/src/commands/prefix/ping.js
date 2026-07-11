@@ -1,5 +1,9 @@
 import { createPrefixCommand } from '../../builders/index.js';
 export default createPrefixCommand('ping')
+    .setDescription('Check the bot latency')
+    .setCategory('General')
+    .addAlias('latency')
+    .addExample('!ping')
     .setCooldown(5)
     .setExecute(async (message) => {
     const sent = await message.reply('Pinging...');

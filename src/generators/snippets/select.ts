@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises';
+import { access, writeFile, mkdir } from 'fs/promises';
 import { join, dirname, basename } from 'path';
 import fg from 'fast-glob';
 import { log } from '../../utils/logger.js';
@@ -48,6 +48,18 @@ export async function generateSelectSnippet(
   const typeDir = join(projectRoot, 'src', 'components', 'selects');
   const targetDir = join(typeDir, dirname(nameWithPath));
   const filePath = join(targetDir, `${selectName}.${ext}`);
+
+  let fileExists = false;
+  try {
+    await access(filePath);
+    fileExists = true;
+  } catch {
+    // File does not exist, which is what we want.
+  }
+  if (fileExists) {
+    log.error(`Refusing to overwrite existing file: src/components/selects/${nameWithPath}.${ext}`);
+    process.exit(1);
+  }
 
   const existing = await fg(`**/${selectName}.${ext}`, {
     cwd: typeDir.replace(/\\/g, '/'),

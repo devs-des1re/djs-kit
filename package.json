@@ -1,14 +1,15 @@
 {
   "name": "@devs-des1re/djs-kit",
-  "version": "0.1.0",
-  "description": "Scaffold a production-ready discord.js v14 single-guild bot",
+  "version": "1.0.0",
+  "description": "Scaffold production-ready discord.js v14 bot projects",
   "type": "module",
   "bin": {
     "djs-kit": "./dist/bin/djs-kit.js"
   },
   "files": [
     "dist",
-    "src/templates"
+    "src/templates",
+    "!dist/tests"
   ],
   "engines": {
     "node": ">=20.12.0"
@@ -18,7 +19,8 @@
     "sync": "node scripts/sync.js",
     "build:all": "tsc && npm run sync",
     "dev": "tsx bin/djs-kit.ts",
-    "start": "node dist/bin/djs-kit.js"
+    "start": "node dist/bin/djs-kit.js",
+    "test": "npm run build && node --test dist/tests/*.test.js"
   },
   "dependencies": {
     "@clack/prompts": "^1.6.0",

@@ -17,6 +17,8 @@ import { ParamType } from '../../builders/types.js';
 
 export default createSlashCommand('echo')
   .setDescription('Echoes a message back to you')
+  .setCategory('Utility')
+  .setExamples(['/echo message:hello'])
   .addParam('message', ParamType.String, { 
     required: true, 
     description: 'The message to echo' 
@@ -48,6 +50,8 @@ import { createPrefixCommand } from '../../builders/index.js';
 import { ParamType } from '../../builders/types.js';
 
 export default createPrefixCommand('say')
+  .setDescription('Send a message to a channel')
+  .setAliases(['s'])
   .addParam('channel', ParamType.TextChannel, { required: true })
   .addParam('message', ParamType.String, { required: true })
   .setExecute(async (message, args) => {
@@ -70,12 +74,44 @@ Both `createSlashCommand` and `createPrefixCommand` share powerful configuration
 
 - **`.setCooldown(seconds: number)`**
   Applies an automatic user-level cooldown before they can use the command again.
-- **`.setPermissions(perms: PermissionConfig)`**
-  Restricts the command to specific roles or users, or blacklists them.
+- **`.setCategory(name: string)`**
+  Groups commands for generated help output.
+- **`.setExamples(examples: string[])`**
+  Adds usage examples for help output and documentation.
+- **`.setDefaultMemberPermissions(permissions)`**
+  Uses Discord-native slash/context command permissions.
 
 ```typescript
-.setPermissions({
-  allowedRoles: ['123456789012345678'],
-  blacklistedUsers: ['987654321098765432']
-})
+import { PermissionFlagsBits } from 'discord.js';
+
+.setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
 ```
+
+## Command Modes
+
+Generated projects can run slash-only, prefix-only, or both from `src/config.ts`.
+
+```typescript
+export const config = {
+  commandMode: 'slash',
+};
+```
+
+Slash-only mode avoids the privileged Message Content intent for bots that do not need prefix commands.
+
+## Autocomplete
+
+```bash
+djs-kit add autocomplete ping style
+```
+
+Autocomplete handlers live in `src/autocomplete/<command>/<option>.ts` and run when Discord asks for option suggestions.
+
+## Context Menus
+
+```bash
+djs-kit add context inspectUser --type user
+djs-kit add context quoteMessage --type message
+```
+
+Context menu commands live in `src/context` and share the same registration flow as slash commands.

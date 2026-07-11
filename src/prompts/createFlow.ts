@@ -2,6 +2,7 @@ import {
   intro,
   outro,
   text,
+  password,
   select,
   group,
   spinner,
@@ -10,7 +11,7 @@ import {
 } from '@clack/prompts';
 import pc from 'picocolors';
 import { validateToken } from '../utils/discord.js';
-import { isValidSnowflake, isValidPrefix, isValidNpmName } from '../utils/validate.js';
+import { isValidSnowflake, isValidPrefix } from '../utils/validate.js';
 import { log } from '../utils/logger.js';
 import type { CreateOptions } from '../types.js';
 
@@ -29,9 +30,8 @@ export async function createFlow(projectName: string): Promise<CreateOptions> {
         }),
 
       token: () =>
-        text({
+        password({
           message: 'Bot token?',
-          placeholder: 'paste your Discord bot token here',
           validate: (v) => (!v || v.trim().length === 0 ? 'Token is required' : undefined),
         }),
 
@@ -57,10 +57,15 @@ export async function createFlow(projectName: string): Promise<CreateOptions> {
 
       db: () =>
         select({
-          message: 'Database backend?',
+          message: 'Cooldown storage?',
           options: [
-            { value: 'none', label: 'None', hint: 'in-memory/file cooldowns only' },
-            { value: 'mongo', label: 'MongoDB', hint: 'persistent cooldowns & data' },
+            { value: 'none', label: 'Memory', hint: 'resets when the bot restarts' },
+            { value: 'file', label: 'File', hint: 'persists cooldowns locally' },
+            { value: 'sqlite', label: 'SQLite + Drizzle', hint: 'local database, great for small bots' },
+            { value: 'postgres', label: 'PostgreSQL + Drizzle', hint: 'production relational database' },
+            { value: 'mysql', label: 'MySQL + Drizzle', hint: 'production relational database' },
+            { value: 'mongo', label: 'MongoDB', hint: 'document database adapter' },
+            { value: 'redis', label: 'Redis', hint: 'fast remote cache/storage' },
           ],
         }),
 
@@ -72,12 +77,15 @@ export async function createFlow(projectName: string): Promise<CreateOptions> {
             !v || !isValidPrefix(v) ? 'Prefix must be between 1 and 4 characters' : undefined,
         }),
 
-      bare: () =>
+      preset: () =>
         select({
-          message: 'Scaffold example commands and components?',
+          message: 'Starter preset?',
           options: [
-            { value: false, label: 'Yes', hint: 'Includes example ping command, buttons, etc.' },
-            { value: true, label: 'No', hint: 'Empty project (bare mode)' },
+            { value: 'utility', label: 'Utility', hint: 'General commands, events, components, and helpers' },
+            { value: 'bare', label: 'Bare', hint: 'Empty folders, no example features' },
+            { value: 'moderation', label: 'Moderation', hint: 'Moderation commands and audit examples' },
+            { value: 'tickets', label: 'Tickets', hint: 'Ticket command, buttons, and modal examples' },
+            { value: 'community', label: 'Community', hint: 'Welcome/community management examples' },
           ],
         }),
     },
@@ -111,9 +119,10 @@ export async function createFlow(projectName: string): Promise<CreateOptions> {
     token: answers.token as string,
     clientId: answers.clientId as string,
     guildId: answers.guildId as string,
-    db: answers.db as 'none' | 'mongo',
+    db: answers.db as CreateOptions['db'],
+    preset: answers.preset as CreateOptions['preset'],
     prefix: answers.prefix as string,
-    bare: answers.bare as boolean,
+    bare: answers.preset === 'bare',
     install: true,
   };
 }

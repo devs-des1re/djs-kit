@@ -1,0 +1,48 @@
+---
+title: Examples
+description: Complete patterns for common bots and generated starter presets.
+---
+
+## Utility Bot
+
+```bash
+djs-kit create utility-bot --lang ts --guild-id 123456789012345678 --preset utility --db none
+```
+
+Good for a first bot. It includes a ping command, help command, example autocomplete, events, and interactive components.
+
+## Moderation Bot
+
+```bash
+djs-kit create mod-bot --lang ts --guild-id 123456789012345678 --preset moderation --db postgres
+```
+
+Use this when you want examples for protected moderation commands and audit logging. Configure `DATABASE_URL`, `LOG_CHANNEL_ID`, and `MOD_AUDIT_CHANNEL_ID` in `.env`.
+
+## Ticket Bot
+
+```bash
+djs-kit create ticket-bot --lang ts --guild-id 123456789012345678 --preset tickets --db sqlite
+```
+
+The ticket preset shows a command, button flow, and modal submission working together with signed component state.
+
+## Community Bot
+
+```bash
+djs-kit create community-bot --lang ts --guild-id 123456789012345678 --preset community --db file
+```
+
+The community preset focuses on server info, member info, and join/leave event examples.
+
+## Add Features Later
+
+```bash
+djs-kit add command admin/ban
+djs-kit add event guildMemberAdd
+djs-kit add autocomplete ping style
+djs-kit add context inspectUser --type user
+djs-kit add button confirmDelete
+djs-kit add modal feedbackForm
+djs-kit add select roleMenu
+```

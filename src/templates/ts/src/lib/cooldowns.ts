@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join, dirname } from 'path';
+import { logger } from './logger.js';
 
 export interface CooldownStore {
   /** Returns remaining cooldown in ms, or null if no active cooldown */
@@ -63,7 +64,7 @@ class FileCooldownStore implements CooldownStore {
         await mkdir(dirname(this.dataFile), { recursive: true });
         await writeFile(this.dataFile, JSON.stringify(this.store || {}), 'utf-8');
       } catch (err) {
-        console.error('Failed to save cooldowns:', err);
+        logger.error('Failed to save cooldowns.', err);
       }
     }, 1000); // Debounce saves
   }
@@ -90,6 +91,16 @@ class FileCooldownStore implements CooldownStore {
   }
 }
 
-export function createCooldownStore(backend: 'memory' | 'file'): CooldownStore {
-  return backend === 'file' ? new FileCooldownStore() : new InMemoryCooldownStore();
+type CooldownBackend = 'memory' | 'file' | 'sqlite' | 'postgres' | 'mysql' | 'mongo' | 'redis';
+
+async function loadDatabaseCooldownStore(): Promise<CooldownStore> {
+  const importer = new Function('path', 'return import(path)') as (path: string) => Promise<{ createDatabaseCooldownStore: () => CooldownStore | Promise<CooldownStore> }>;
+  const mod = await importer('../db/cooldowns.js');
+  return mod.createDatabaseCooldownStore();
+}
+
+export async function createCooldownStore(backend: CooldownBackend): Promise<CooldownStore> {
+  if (backend === 'file') return new FileCooldownStore();
+  if (backend === 'memory') return new InMemoryCooldownStore();
+  return loadDatabaseCooldownStore();
 }

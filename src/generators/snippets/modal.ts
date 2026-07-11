@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises';
+import { access, writeFile, mkdir } from 'fs/promises';
 import { join, dirname, basename } from 'path';
 import fg from 'fast-glob';
 import { log } from '../../utils/logger.js';
@@ -49,6 +49,18 @@ export async function generateModalSnippet(
   const typeDir = join(projectRoot, 'src', 'components', 'modals');
   const targetDir = join(typeDir, dirname(nameWithPath));
   const filePath = join(targetDir, `${modalName}.${ext}`);
+
+  let fileExists = false;
+  try {
+    await access(filePath);
+    fileExists = true;
+  } catch {
+    // File does not exist, which is what we want.
+  }
+  if (fileExists) {
+    log.error(`Refusing to overwrite existing file: src/components/modals/${nameWithPath}.${ext}`);
+    process.exit(1);
+  }
 
   const existing = await fg(`**/${modalName}.${ext}`, {
     cwd: typeDir.replace(/\\/g, '/'),

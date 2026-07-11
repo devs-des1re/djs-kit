@@ -1,0 +1,53 @@
+---
+title: Database Presets
+description: Pick memory, file, SQL, MongoDB, or Redis storage when creating a bot.
+---
+
+`djs-kit` can scaffold storage and cooldown persistence for several backends.
+
+```bash
+djs-kit create my-bot --lang ts --guild-id 123456789012345678 --db postgres
+```
+
+Supported values are:
+
+| Preset | Best for | Generated support |
+| --- | --- | --- |
+| `none` | Simple bots and local tests | In-memory cooldowns |
+| `file` | Small bots on one machine | File-backed cooldowns |
+| `sqlite` | Small production bots | Drizzle schema, migrations, local SQLite database |
+| `postgres` | Hosted production bots | Drizzle schema, migrations, Postgres client |
+| `mysql` | MySQL/MariaDB deployments | Drizzle schema, migrations, MySQL client |
+| `mongo` | MongoDB based bots | Mongo cooldown store |
+| `redis` | Shared fast cooldowns | Redis cooldown store |
+
+## SQL With Drizzle
+
+The `sqlite`, `postgres`, and `mysql` presets add:
+
+```bash
+npm run db:generate
+npm run db:migrate
+npm run db:studio
+```
+
+They also generate `drizzle.config.ts`, `src/db/schema.ts`, and a cooldown store implementation.
+
+## Configuration
+
+Credentials belong in `.env`.
+
+```bash
+DATABASE_URL=postgres://user:password@localhost:5432/my_bot
+```
+
+Runtime choices belong in `src/config.ts`.
+
+```typescript
+export const config = {
+  prefix: '!',
+  cooldownBackend: 'postgres',
+};
+```
+
+This keeps secrets out of source control while leaving normal bot behavior easy to review and edit.
