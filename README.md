@@ -16,6 +16,8 @@
 - **Organized Architecture:** A clean, modular folder structure that scales seamlessly.
 - **TypeScript & JavaScript Support:** Choose between strict TS or flexible JS output.
 - **Hot Reloading:** Pre-configured with `nodemon` and `tsx` for instant live-reloading during development.
+- **Auto Sharding:** Generated bots include `dev:shards` and `start:shards` powered by Discord.js `ShardingManager`.
+- **Startup Log Files:** Every bot run writes a fresh file under `logs/` for easier debugging.
 
 ## Quick Start
 
@@ -30,6 +32,13 @@ The CLI will launch an interactive flow to configure your bot (Output Language, 
 ```bash
 cd my-discord-bot
 npm run dev
+```
+
+For auto-sharded development or production starts:
+
+```bash
+npm run dev:shards
+npm run start:shards
 ```
 
 ## Database Presets
@@ -140,6 +149,7 @@ Generated projects include reusable helpers in `src/lib` for common bot work:
 - Confirmation prompts: `askForConfirmation`
 - Guards: `guildOnly`, `ownerOnly`, `requireUserPermissions`, `requireBotPermissions`
 - Logging/audit helpers: `sendLog`, `sendModerationAudit`
+- Per-start log files in `logs/`
 
 ## Documentation
 

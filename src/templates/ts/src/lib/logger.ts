@@ -1,4 +1,6 @@
 import { config } from '../config.js';
+import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 const colors = {
   reset: '\x1b[0m',
@@ -11,6 +13,21 @@ const colors = {
 };
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+
+const logStartedAt = new Date();
+const logFileName = `bot-${logStartedAt.toISOString().replace(/[:.]/g, '-')}-${process.pid}.log`;
+export const logFilePath = join(process.cwd(), 'logs', logFileName);
+
+function writeLogHeader(): void {
+  try {
+    mkdirSync(join(process.cwd(), 'logs'), { recursive: true });
+    writeFileSync(logFilePath, `djs-kit log started at ${logStartedAt.toISOString()}\nprocess ${process.pid}\n\n`);
+  } catch {
+    // Console logging still works if the host filesystem is read-only.
+  }
+}
+
+writeLogHeader();
 
 const levelPriority: Record<LogLevel, number> = {
   debug: 10,
@@ -28,22 +45,45 @@ function formatError(error: unknown): string {
   return String(error);
 }
 
+function stripAnsi(value: string): string {
+  return value.replace(/\x1b\[[0-9;]*m/g, '');
+}
+
+function writeToFile(level: LogLevel | 'success', msg: string, error?: unknown): void {
+  try {
+    const lines = [`[${new Date().toISOString()}] [${level.toUpperCase()}] ${stripAnsi(msg)}`];
+    if (error !== undefined) lines.push(formatError(error));
+    appendFileSync(logFilePath, `${lines.join('\n')}\n`);
+  } catch {
+    // Avoid recursive logger failures.
+  }
+}
+
 export const logger = {
   debug: (msg: string) => {
-    if (shouldLog('debug')) console.log(`${colors.debug}[DEBUG]${colors.reset} ${msg}`);
+    if (!shouldLog('debug')) return;
+    console.log(`${colors.debug}[DEBUG]${colors.reset} ${msg}`);
+    writeToFile('debug', msg);
   },
   info: (msg: string) => {
-    if (shouldLog('info')) console.log(`${colors.info}[INFO]${colors.reset} ${msg}`);
+    if (!shouldLog('info')) return;
+    console.log(`${colors.info}[INFO]${colors.reset} ${msg}`);
+    writeToFile('info', msg);
   },
   success: (msg: string) => {
-    if (shouldLog('info')) console.log(`${colors.success}[SUCCESS]${colors.reset} ${msg}`);
+    if (!shouldLog('info')) return;
+    console.log(`${colors.success}[SUCCESS]${colors.reset} ${msg}`);
+    writeToFile('success', msg);
   },
   warn: (msg: string) => {
-    if (shouldLog('warn')) console.warn(`${colors.warn}[WARN]${colors.reset} ${msg}`);
+    if (!shouldLog('warn')) return;
+    console.warn(`${colors.warn}[WARN]${colors.reset} ${msg}`);
+    writeToFile('warn', msg);
   },
   error: (msg: string, error?: unknown) => {
     if (!shouldLog('error')) return;
     console.error(`${colors.error}[ERROR]${colors.reset} ${msg}`);
     if (error !== undefined) console.error(formatError(error));
+    writeToFile('error', msg, error);
   },
 };
