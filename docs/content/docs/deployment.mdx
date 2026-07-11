@@ -15,6 +15,7 @@ DATABASE_URL=...
 DJSKIT_COMPONENT_SECRET=...
 LOG_CHANNEL_ID=...
 MOD_AUDIT_CHANNEL_ID=...
+DISCORD_TOTAL_SHARDS=auto
 ```
 
 Use `src/config.ts` for normal behavior such as prefix, command mode, command registration target, and cooldown backend.
@@ -41,6 +42,21 @@ djs-kit sync-commands
 ```
 
 `doctor` checks project shape, `validate` checks configuration, and `sync-commands` registers slash commands without starting the bot.
+
+## Auto Sharding
+
+Generated projects include a Discord.js sharding manager. Use it when your bot is large enough to need multiple shards, or when you want Discord.js to choose the shard count for you.
+
+```bash
+npm run dev:shards
+npm run start:shards
+```
+
+By default, `DISCORD_TOTAL_SHARDS=auto` lets Discord.js resolve the recommended shard count. Set it to a positive number when your host needs an explicit shard count.
+
+## Log Files
+
+Every bot start creates a new file in `logs/`, such as `logs/bot-2026-07-11T12-00-00-000Z-12345.log`. Console output still works, and `logs/` is ignored by git in generated projects.
 
 ## Graceful Shutdown
 

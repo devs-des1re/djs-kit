@@ -43,6 +43,7 @@ test('generates env credentials and project behavior config', async () => {
     assert.match(config, /cooldownBackend: 'file'/);
     assert.match(config, /commandMode: 'both'/);
     assert.match(config, /commandRegistration: 'guild'/);
+    assert.match(config, /totalShards: parseShardCount/);
     assert.match(config, /componentStateSecret/);
     assert.match(config, /ownerIds: parseList/);
     assert.match(config, /logLevel: 'info'/);
@@ -55,6 +56,17 @@ test('generates env credentials and project behavior config', async () => {
 
     const index = await readFile(join(tmp, 'phase-one-bot', 'src', 'index.ts'), 'utf-8');
     assert.match(index, /loadEvents\(client\)/);
+    assert.match(index, /Writing logs to/);
+
+    const shard = await readFile(join(tmp, 'phase-one-bot', 'src', 'shard.ts'), 'utf-8');
+    assert.match(shard, /ShardingManager/);
+    assert.match(shard, /totalShards: config\.totalShards/);
+    assert.match(shard, /respawn: true/);
+
+    const logger = await readFile(join(tmp, 'phase-one-bot', 'src', 'lib', 'logger.ts'), 'utf-8');
+    assert.match(logger, /logs/);
+    assert.match(logger, /bot-\$\{logStartedAt/);
+    assert.match(logger, /appendFileSync/);
 
     const eventLoader = await readFile(join(tmp, 'phase-one-bot', 'src', 'handlers', 'eventLoader.ts'), 'utf-8');
     assert.match(eventLoader, /join\(__dirname, '\.\.', 'events'\)/);
@@ -100,6 +112,8 @@ test('generates env credentials and project behavior config', async () => {
 
     const pkg = JSON.parse(await readFile(join(tmp, 'phase-one-bot', 'package.json'), 'utf-8'));
     assert.equal(pkg.scripts['sync:commands'], 'tsx src/scripts/syncCommands.ts');
+    assert.equal(pkg.scripts['dev:shards'], 'nodemon --watch src --ext ts,js,json --exec node --import tsx src/shard.ts');
+    assert.equal(pkg.scripts['start:shards'], 'node dist/src/shard.js');
 
     const syncScript = await readFile(join(tmp, 'phase-one-bot', 'src', 'scripts', 'syncCommands.ts'), 'utf-8');
     assert.match(syncScript, /loadCommands/);
@@ -172,6 +186,11 @@ test('generates a JavaScript project with synced runtime features', async () => 
     const config = await readFile(join(tmp, 'js-bot', 'src', 'config.js'), 'utf-8');
     assert.match(config, /DISCORD_GUILD_ID.*optional/);
     assert.match(config, /cooldownBackend: 'redis'/);
+    assert.match(config, /totalShards: parseShardCount/);
+
+    const shard = await readFile(join(tmp, 'js-bot', 'src', 'shard.js'), 'utf-8');
+    assert.match(shard, /ShardingManager/);
+    assert.match(shard, /totalShards: config\.totalShards/);
 
     const readyEvent = await readFile(join(tmp, 'js-bot', 'src', 'events', 'ready.js'), 'utf-8');
     assert.match(readyEvent, /createEvent\(Events\.ClientReady\)/);

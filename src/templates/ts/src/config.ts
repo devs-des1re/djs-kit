@@ -9,6 +9,7 @@ const envSchema = z.object({
   DJSKIT_COMPONENT_SECRET: z.string().optional(),
   LOG_CHANNEL_ID: z.string().optional(),
   MOD_AUDIT_CHANNEL_ID: z.string().optional(),
+  DISCORD_TOTAL_SHARDS: z.string().optional(),
 });
 
 const envResult = envSchema.safeParse(process.env);
@@ -29,6 +30,16 @@ function parseList(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+function parseShardCount(value: string | undefined): 'auto' | number {
+  if (!value || value.toLowerCase() === 'auto') return 'auto';
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    console.error('[Config] DISCORD_TOTAL_SHARDS must be "auto" or a positive integer.');
+    process.exit(1);
+  }
+  return parsed;
+}
+
 export const config = {
   token: envResult.data.DISCORD_TOKEN,
   clientId: envResult.data.DISCORD_CLIENT_ID,
@@ -43,6 +54,7 @@ export const config = {
   componentStateSecret: envResult.data.DJSKIT_COMPONENT_SECRET ?? envResult.data.DISCORD_TOKEN,
   logChannelId: envResult.data.LOG_CHANNEL_ID,
   modAuditChannelId: envResult.data.MOD_AUDIT_CHANNEL_ID,
+  totalShards: parseShardCount(envResult.data.DISCORD_TOTAL_SHARDS),
   logLevel: 'info' as 'debug' | 'info' | 'warn' | 'error',
 } as const;
 

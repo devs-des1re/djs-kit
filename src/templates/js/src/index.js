@@ -7,7 +7,7 @@ import { loadAutocompleteHandlers } from './handlers/autocompleteLoader.js';
 import { loadContextMenus } from './handlers/contextLoader.js';
 import { registerCommandHandler } from './handlers/commandHandler.js';
 import { registerComponentHandler } from './handlers/componentHandler.js';
-import { logger } from './lib/logger.js';
+import { logger, logFilePath } from './lib/logger.js';
 import { registerRuntimeHandlers } from './lib/runtime.js';
 import { config } from './config.js';
 const intents = [
@@ -30,6 +30,7 @@ client.autocompleteHandlers = new Collection();
 client.contextMenus = new Collection();
 registerRuntimeHandlers(client);
 try {
+    logger.info(`Writing logs to ${logFilePath}.`);
     await loadEvents(client);
     await loadAutocompleteHandlers(client);
     await loadContextMenus(client);
