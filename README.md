@@ -13,6 +13,7 @@
 - **Instant Scaffolding:** Create a fully-functioning bot with interactive prompts.
 - **Type-Safe Builders:** Chainable, deeply typed builder APIs for commands and components.
 - **Smart State Serialization:** Pass variables between commands and button clicks natively without a database via `.addParam()`.
+- **Components v2 Modals:** Build modal text inputs, dropdowns, radio groups, checkboxes, and file/image uploads.
 - **Organized Architecture:** A clean, modular folder structure that scales seamlessly.
 - **TypeScript & JavaScript Support:** Choose between strict TS or flexible JS output.
 - **Hot Reloading:** Pre-configured with `nodemon` and `tsx` for instant live-reloading during development.

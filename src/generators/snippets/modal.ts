@@ -16,11 +16,28 @@ function tsTemplate(customId: string, nameWithPath: string): string {
 import { FieldStyle } from '${builders}/types.js';
 
 export default createModal('${customId}')
+  .setTitle('Example Form')
   // .addField('summary', { style: FieldStyle.Short, minLength: 5, maxLength: 100, required: true })
   // .addField('details', { style: FieldStyle.Paragraph, required: false })
+  // .addTextDisplay('Use the fields below to send us more context.')
+  // .addStringSelect('topic', {
+  //   label: 'Topic',
+  //   options: [
+  //     { label: 'Bug', value: 'bug' },
+  //     { label: 'Feature', value: 'feature' },
+  //   ],
+  // })
+  // .addRadioGroup('priority', {
+  //   label: 'Priority',
+  //   options: [
+  //     { label: 'Normal', value: 'normal', default: true },
+  //     { label: 'Urgent', value: 'urgent' },
+  //   ],
+  // })
+  // .addImageUpload('screenshot', { required: false, maxValues: 1 })
   // .setPermissions({ allowedRoles: [] })
   .setExecute(async (interaction, fields) => {
-    // fields.summary, fields.details
+    // fields.summary, fields.topic, fields.priority, fields.screenshot
     await interaction.reply({ content: 'Form submitted!', ephemeral: true });
   });
 `;
@@ -32,6 +49,10 @@ function jsTemplate(customId: string, nameWithPath: string): string {
 import { FieldStyle } from '${builders}/types.js';
 
 export default createModal('${customId}')
+  .setTitle('Example Form')
+  // .addField('summary', { style: FieldStyle.Short, minLength: 5, maxLength: 100, required: true })
+  // .addStringSelect('topic', { options: [{ label: 'Bug', value: 'bug' }, { label: 'Feature', value: 'feature' }] })
+  // .addImageUpload('screenshot', { required: false, maxValues: 1 })
   .setExecute(async (interaction, fields) => {
     await interaction.reply({ content: 'Form submitted!', ephemeral: true });
   });

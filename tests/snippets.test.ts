@@ -8,6 +8,7 @@ import { generateCommandSnippet } from '../src/generators/snippets/command.js';
 import { generateEventSnippet } from '../src/generators/snippets/event.js';
 import { generateAutocompleteSnippet } from '../src/generators/snippets/autocomplete.js';
 import { generateContextSnippet } from '../src/generators/snippets/context.js';
+import { generateModalSnippet } from '../src/generators/snippets/modal.js';
 
 test('command generator refuses to overwrite an exact destination file', async () => {
   const tmp = await mkdtemp(join(tmpdir(), 'djskit-snippet-'));
@@ -63,6 +64,20 @@ test('advanced interaction generators create autocomplete and context snippets',
     await generateContextSnippet('inspectUser', 'user', 'ts', tmp);
     const contextFile = await readFile(join(tmp, 'src', 'contexts', 'user', 'inspectUser.ts'), 'utf-8');
     assert.match(contextFile, /createUserContextMenu\('Inspect User'\)/);
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+});
+
+test('modal generator includes components v2 helper examples', async () => {
+  const tmp = await mkdtemp(join(tmpdir(), 'djskit-modal-'));
+
+  try {
+    await generateModalSnippet('feedback', 'ts', tmp);
+    const modalFile = await readFile(join(tmp, 'src', 'components', 'modals', 'feedback.ts'), 'utf-8');
+    assert.match(modalFile, /addStringSelect\('topic'/);
+    assert.match(modalFile, /addRadioGroup\('priority'/);
+    assert.match(modalFile, /addImageUpload\('screenshot'/);
   } finally {
     await rm(tmp, { recursive: true, force: true });
   }

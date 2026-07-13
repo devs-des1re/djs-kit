@@ -4,11 +4,13 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon --watch src src/index.js",
+    "dev:shards": "nodemon --watch src src/shard.js",
     "start": "node src/index.js",
+    "start:shards": "node src/shard.js",
     "sync:commands": "node src/scripts/syncCommands.js"
   },
   "dependencies": {
-    "discord.js": "^14.0.0",
+    "discord.js": "^14.26.4",
     "dotenv": "^16.0.0",
     "fast-glob": "^3.3.3",
     "zod": "^3.25.76"
