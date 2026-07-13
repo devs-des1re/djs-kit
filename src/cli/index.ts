@@ -35,13 +35,16 @@ Example calls:
   $ djs-kit add context inspectUser --type user
   $ djs-kit add button confirm_delete
   $ djs-kit add command admin/ban --type prefix
+  $ djs-kit add command info prefix
 `);
 
 addCmd
-  .command('command <name>')
+  .command('command <name> [type]')
   .description('Generate a new command file. <name> accepts paths like moderation/kick')
   .option('--type <slash|prefix>', 'command type (slash or prefix)', 'slash')
-  .action((name: string, opts: { type: string }) => handleAdd('command', name, opts));
+  .action((name: string, type: string | undefined, opts: { type: string }) => {
+    handleAdd('command', name, { ...opts, type: type ?? opts.type });
+  });
 
 addCmd
   .command('event <name>')

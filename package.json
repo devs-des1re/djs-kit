@@ -1,10 +1,11 @@
 {
   "name": "@devs-des1re/djs-kit",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Scaffold production-ready discord.js v14 bot projects",
   "type": "module",
   "bin": {
-    "djs-kit": "./dist/bin/djs-kit.js"
+    "djs-kit": "./dist/index.js",
+    "djskit": "./dist/index.js"
   },
   "files": [
     "dist",
