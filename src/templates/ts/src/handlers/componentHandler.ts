@@ -73,13 +73,35 @@ export function registerComponentHandler(client: Client): void {
           return;
         }
 
-        const args: Record<string, string | undefined> = {};
+        const args: Record<string, unknown> = {};
         for (const field of desc.fields) {
+          if (field.kind === 'textDisplay') continue;
+
           try {
-            const val = interaction.fields.getTextInputValue(field.name);
-            if (field.minLength && val.length < field.minLength) throw new Error();
-            if (field.maxLength && val.length > field.maxLength) throw new Error();
-            args[field.name] = val;
+            if (!field.kind || field.kind === 'text') {
+              const val = interaction.fields.getTextInputValue(field.name);
+              if (field.minLength && val.length < field.minLength) throw new Error();
+              if (field.maxLength && val.length > field.maxLength) throw new Error();
+              args[field.name] = val;
+            } else if (field.kind === 'stringSelect') {
+              args[field.name] = interaction.fields.getStringSelectValues(field.name);
+            } else if (field.kind === 'userSelect') {
+              args[field.name] = interaction.fields.getSelectedUsers(field.name, field.required);
+            } else if (field.kind === 'roleSelect') {
+              args[field.name] = interaction.fields.getSelectedRoles(field.name, field.required);
+            } else if (field.kind === 'channelSelect') {
+              args[field.name] = interaction.fields.getSelectedChannels(field.name, field.required, field.channelTypes);
+            } else if (field.kind === 'mentionableSelect') {
+              args[field.name] = interaction.fields.getSelectedMentionables(field.name, field.required);
+            } else if (field.kind === 'fileUpload') {
+              args[field.name] = interaction.fields.getUploadedFiles(field.name, field.required);
+            } else if (field.kind === 'radio') {
+              args[field.name] = interaction.fields.getRadioGroup(field.name, field.required);
+            } else if (field.kind === 'checkboxGroup') {
+              args[field.name] = interaction.fields.getCheckboxGroup(field.name);
+            } else if (field.kind === 'checkbox') {
+              args[field.name] = interaction.fields.getCheckbox(field.name);
+            }
           } catch {
             args[field.name] = undefined;
           }

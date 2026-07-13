@@ -48,7 +48,7 @@ Whenever you render this button in a command, use `buildCustomId()` to pass vari
 
 Generate a modal snippet by running `djs-kit add modal feedback`.
 
-Modals are slightly different because they take user input rather than predefined parameters. `djs-kit` allows you to define the text fields using `.addField()`, and then automatically extracts the user's submitted values into an object!
+Modals are slightly different because they take user input rather than predefined parameters. `djs-kit` allows you to define the modal UI using builder helpers, and then automatically extracts the user's submitted values into an object.
 
 ```typescript
 // src/components/modals/feedback.ts
@@ -57,10 +57,30 @@ import { FieldStyle } from '../../builders/types.js';
 
 export default createModal('feedback_modal')
   .setTitle('Submit Feedback')
+  .addTextDisplay('Tell us what happened and attach a screenshot if it helps.')
   .addField('summary', { 
     label: 'Summary', 
     style: FieldStyle.Short, 
     required: true 
+  })
+  .addStringSelect('topic', {
+    label: 'Topic',
+    options: [
+      { label: 'Bug', value: 'bug' },
+      { label: 'Feature', value: 'feature' },
+    ],
+  })
+  .addRadioGroup('priority', {
+    label: 'Priority',
+    options: [
+      { label: 'Normal', value: 'normal', default: true },
+      { label: 'Urgent', value: 'urgent' },
+    ],
+  })
+  .addImageUpload('screenshot', {
+    label: 'Screenshot',
+    required: false,
+    maxValues: 1,
   })
   .addField('details', { 
     label: 'Details', 
@@ -68,9 +88,11 @@ export default createModal('feedback_modal')
     required: false 
   })
   .setExecute(async (interaction, fields) => {
-    // `fields` is fully typed based on your .addField calls!
+    // `fields` is typed based on your modal builder calls.
     // fields.summary is `string`
-    // fields.details is `string | undefined`
+    // fields.topic is `readonly string[]`
+    // fields.priority is `string | null`
+    // fields.screenshot is a Discord attachment collection or null
     
     await interaction.reply({ 
       content: `Feedback received! Summary: ${fields.summary}`, 
@@ -79,7 +101,22 @@ export default createModal('feedback_modal')
   });
 ```
 
-Modal builders can also generate the modal UI, so the field definitions and submitted values stay in one file.
+Modal builders can generate the modal UI, so the field definitions and submitted values stay in one file.
+
+### Components v2 Modal Helpers
+
+Available modal helpers:
+
+- `.addField()` for short and paragraph text inputs
+- `.addTextDisplay()` for read-only text
+- `.addStringSelect()` for dropdowns
+- `.addUserSelect()`, `.addRoleSelect()`, `.addChannelSelect()`, `.addMentionableSelect()`
+- `.addFileUpload()` for attachments
+- `.addImageUpload()` as a convenience prompt for image attachments
+- `.addRadioGroup()` for single-choice radio buttons
+- `.addCheckboxGroup()` and `.addCheckbox()` for boolean choices
+
+Discord returns uploaded files as attachments. Always validate file type, size, and content before processing a user upload.
 
 ## Select Menus
 

@@ -97,6 +97,11 @@ test('generates env credentials and project behavior config', async () => {
     const messageContext = await readFile(join(tmp, 'phase-one-bot', 'src', 'contexts', 'message', 'quoteMessage.ts'), 'utf-8');
     assert.match(messageContext, /createMessageContextMenu/);
 
+    const feedbackModal = await readFile(join(tmp, 'phase-one-bot', 'src', 'components', 'modals', 'feedbackForm.ts'), 'utf-8');
+    assert.match(feedbackModal, /addStringSelect\('topic'/);
+    assert.match(feedbackModal, /addRadioGroup\('priority'/);
+    assert.match(feedbackModal, /addImageUpload\('screenshot'/);
+
     const customId = await readFile(join(tmp, 'phase-one-bot', 'src', 'lib', 'customId.ts'), 'utf-8');
     assert.match(customId, /createHmac/);
     assert.match(customId, /buildLegacyCustomId/);
@@ -187,6 +192,10 @@ test('generates a JavaScript project with synced runtime features', async () => 
     assert.match(config, /DISCORD_GUILD_ID.*optional/);
     assert.match(config, /cooldownBackend: 'redis'/);
     assert.match(config, /totalShards: parseShardCount/);
+
+    const pkg = JSON.parse(await readFile(join(tmp, 'js-bot', 'package.json'), 'utf-8'));
+    assert.equal(pkg.dependencies['discord.js'], '^14.26.4');
+    assert.equal(pkg.scripts['start:shards'], 'node src/shard.js');
 
     const shard = await readFile(join(tmp, 'js-bot', 'src', 'shard.js'), 'utf-8');
     assert.match(shard, /ShardingManager/);
