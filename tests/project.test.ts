@@ -102,6 +102,9 @@ test('generates env credentials and project behavior config', async () => {
     assert.match(feedbackModal, /addRadioGroup\('priority'/);
     assert.match(feedbackModal, /addImageUpload\('screenshot'/);
 
+    const builders = await readFile(join(tmp, 'phase-one-bot', 'src', 'builders', 'index.ts'), 'utf-8');
+    assert.doesNotMatch(builders, /\n\s+\.setLabel\(field\.label \?\? field\.name\)/);
+
     const customId = await readFile(join(tmp, 'phase-one-bot', 'src', 'lib', 'customId.ts'), 'utf-8');
     assert.match(customId, /createHmac/);
     assert.match(customId, /buildLegacyCustomId/);

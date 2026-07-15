@@ -66,8 +66,8 @@ export default createModal('feedback_modal')
   .addStringSelect('topic', {
     label: 'Topic',
     options: [
-      { label: 'Bug', value: 'bug' },
-      { label: 'Feature', value: 'feature' },
+      { label: 'Bug', value: 'bug', emoji: '🐛' },
+      { label: 'Feature', value: 'feature', emoji: '✨' },
     ],
   })
   .addRadioGroup('priority', {
@@ -117,6 +117,18 @@ Available modal helpers:
 - `.addCheckboxGroup()` and `.addCheckbox()` for boolean choices
 
 Discord returns uploaded files as attachments. Always validate file type, size, and content before processing a user upload.
+
+String dropdown options can include unicode or custom emoji values:
+
+```typescript
+.addStringSelect('type', {
+  label: 'Support',
+  options: [
+    { label: 'Private Support', value: 'privateSupport', emoji: '🎫' },
+    { label: 'Reports', value: 'reports', emoji: { id: '123456789012345678', name: 'report' } },
+  ],
+})
+```
 
 ## Select Menus
 
