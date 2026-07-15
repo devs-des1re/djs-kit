@@ -3,7 +3,8 @@ export async function parseArgs(message, tokens, params, guild, consumedTokens) 
     const args = {};
     const restTokens = [...tokens];
     let rawIndex = 0;
-    for (const param of params) {
+    for (let index = 0; index < params.length; index++) {
+        const param = params[index];
         if (restTokens.length === 0) {
             if (param.required) {
                 await message.reply(`Missing required argument: \`${param.name}\` (${param.description ?? param.type})`);
@@ -17,8 +18,10 @@ export async function parseArgs(message, tokens, params, guild, consumedTokens) 
         let resolved = null;
         switch (param.type) {
             case ParamType.String:
-                resolved = token;
-                if (param.choices && !param.choices.includes(token)) {
+                resolved = index === params.length - 1
+                    ? [token, ...restTokens.splice(0)].join(' ')
+                    : token;
+                if (param.choices && !param.choices.includes(resolved)) {
                     await message.reply(`Invalid choice for \`${param.name}\`. Must be one of: ${param.choices.join(', ')}`);
                     return null;
                 }

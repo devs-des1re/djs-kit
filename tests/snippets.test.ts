@@ -59,6 +59,39 @@ test('slash subcommands preserve descriptions in built descriptors', async () =>
   assert.equal(command.subcommands[0].description, 'Approves a suggestion.');
 });
 
+test('prefix parser lets the final string param consume long text', async () => {
+  const parser = await importRuntimeModule(
+    pathToFileURL(join(process.cwd(), 'src', 'templates', 'js', 'src', 'lib', 'argParser.js')).href
+  );
+  const types = await importRuntimeModule(
+    pathToFileURL(join(process.cwd(), 'src', 'templates', 'js', 'src', 'builders', 'types.js')).href
+  );
+
+  const replies: string[] = [];
+  const message = {
+    content: '!suggestion create Better search for long forum posts',
+    reply: async (content: string) => {
+      replies.push(content);
+    },
+  };
+
+  const args = await parser.parseArgs(
+    message,
+    ['Better', 'search', 'for', 'long', 'forum', 'posts'],
+    [
+      { name: 'title', type: types.ParamType.String, required: true },
+      { name: 'description', type: types.ParamType.String, required: true },
+    ],
+    {},
+    2
+  );
+
+  assert.deepEqual(replies, []);
+  assert.equal(args.title, 'Better');
+  assert.equal(args.description, 'search for long forum posts');
+  assert.deepEqual(args._rest, []);
+});
+
 test('event generator creates typed event listener snippets', async () => {
   const tmp = await mkdtemp(join(tmpdir(), 'djskit-event-'));
   await mkdir(join(tmp, 'src', 'events'), { recursive: true });

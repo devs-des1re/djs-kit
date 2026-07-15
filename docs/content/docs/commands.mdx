@@ -67,6 +67,7 @@ For prefix commands, `djs-kit` comes with an internal Argument Parser. It native
 - It resolves `#channel` mentions to `Channel` objects.
 - It resolves `@user` mentions to `User` or `Member` objects.
 - It respects quotation marks for multi-word strings!
+- If the final parameter is a string, it consumes the remaining text (e.g. `!suggestion create Better search` maps the last string param to `Better search`).
 
 ## Shared Builder Methods
 
