@@ -23,8 +23,8 @@ export default createModal('${customId}')
   // .addStringSelect('topic', {
   //   label: 'Topic',
   //   options: [
-  //     { label: 'Bug', value: 'bug' },
-  //     { label: 'Feature', value: 'feature' },
+  //     { label: 'Bug', value: 'bug', emoji: '🐛' },
+  //     { label: 'Feature', value: 'feature', emoji: '✨' },
   //   ],
   // })
   // .addRadioGroup('priority', {
@@ -51,7 +51,7 @@ import { FieldStyle } from '${builders}/types.js';
 export default createModal('${customId}')
   .setTitle('Example Form')
   // .addField('summary', { style: FieldStyle.Short, minLength: 5, maxLength: 100, required: true })
-  // .addStringSelect('topic', { options: [{ label: 'Bug', value: 'bug' }, { label: 'Feature', value: 'feature' }] })
+  // .addStringSelect('topic', { options: [{ label: 'Bug', value: 'bug', emoji: '🐛' }, { label: 'Feature', value: 'feature', emoji: '✨' }] })
   // .addImageUpload('screenshot', { required: false, maxValues: 1 })
   .setExecute(async (interaction, fields) => {
     await interaction.reply({ content: 'Form submitted!', ephemeral: true });

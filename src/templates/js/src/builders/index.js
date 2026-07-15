@@ -457,6 +457,12 @@ export function createPrefixCommand(name) {
 export function createSubcommand(name) {
     return makeSubcommandBuilder({ name, params: [] });
 }
+export function createSlashSubcommand(name) {
+    return makeSubcommandBuilder({ name, params: [] });
+}
+export function createPrefixSubcommand(name) {
+    return makeSubcommandBuilder({ name, params: [] });
+}
 export function createButton(customId) {
     return makeButtonBuilder({ customId, params: [] });
 }

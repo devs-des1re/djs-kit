@@ -8,9 +8,9 @@ export default createModal('feedback_form')
   .addStringSelect('topic', {
     label: 'Topic',
     options: [
-      { label: 'Bug', value: 'bug' },
-      { label: 'Feature request', value: 'feature' },
-      { label: 'General feedback', value: 'general' },
+      { label: 'Bug', value: 'bug', emoji: '🐛' },
+      { label: 'Feature request', value: 'feature', emoji: '✨' },
+      { label: 'General feedback', value: 'general', emoji: '💬' },
     ],
   })
   .addRadioGroup('priority', {

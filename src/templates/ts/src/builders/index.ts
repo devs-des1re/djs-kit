@@ -22,6 +22,7 @@ import type {
   ReadonlyCollection,
   Snowflake,
   ChannelType,
+  ComponentEmojiResolvable,
 } from 'discord.js';
 import {
   ActionRowBuilder,
@@ -121,6 +122,7 @@ export interface ModalChoiceOption {
   value: string;
   description?: string;
   default?: boolean;
+  emoji?: ComponentEmojiResolvable;
 }
 
 export interface ModalDescriptor {
@@ -262,7 +264,7 @@ export interface SlashCommandBuilder<TArgs extends Record<string, unknown>> {
     type: T,
     opts?: O
   ): SlashCommandBuilder<TArgs & { [P in K]: ResolvedParam<T, O> }>;
-  addSubcommand(sub: SubcommandBuilderResult): SlashCommandBuilder<TArgs>;
+  addSubcommand(sub: SlashSubcommandBuilderResult): SlashCommandBuilder<TArgs>;
   setPermissions(perms: PermissionConfig): SlashCommandBuilder<TArgs>;
   setDefaultMemberPermissions(permissions: PermissionResolvable): SlashCommandBuilder<TArgs>;
   setOwnerOnly(): SlashCommandBuilder<TArgs>;
@@ -354,7 +356,7 @@ export interface PrefixCommandBuilder<TArgs extends Record<string, unknown>> {
     type: T,
     opts?: O
   ): PrefixCommandBuilder<TArgs & { [P in K]: ResolvedParam<T, O> }>;
-  addSubcommand(sub: SubcommandBuilderResult): PrefixCommandBuilder<TArgs>;
+  addSubcommand(sub: PrefixSubcommandBuilderResult): PrefixCommandBuilder<TArgs>;
   setPermissions(perms: PermissionConfig): PrefixCommandBuilder<TArgs>;
   setOwnerOnly(): PrefixCommandBuilder<TArgs>;
   setDevOnly(): PrefixCommandBuilder<TArgs>;
@@ -429,23 +431,37 @@ function makePrefixBuilder<TArgs extends Record<string, unknown>>(
 
 // ─── Subcommand Builder ───────────────────────────────────────────────────────
 
-export interface SubcommandBuilder<TArgs extends Record<string, unknown>> {
+type SubcommandContext = ChatInputCommandInteraction | Message<true>;
+type SubcommandArgs<TArgs, TContext extends SubcommandContext> =
+  TContext extends Message<true>
+    ? TArgs & { _raw: string; _rest: string[] }
+    : TArgs & { _raw?: undefined };
+
+export interface SubcommandBuilder<
+  TArgs extends Record<string, unknown>,
+  TContext extends SubcommandContext = SubcommandContext
+> {
   addParam<K extends string, T extends ParamType, O extends ParamOptions>(
     name: K,
     type: T,
     opts?: O
-  ): SubcommandBuilder<TArgs & { [P in K]: ResolvedParam<T, O> }>;
-  setPermissions(perms: PermissionConfig): SubcommandBuilder<TArgs>;
-  setCooldown(seconds: number): SubcommandBuilder<TArgs>;
-  setExecute(fn: (interaction: ChatInputCommandInteraction | Message<true>, args: TArgs & Partial<{ _raw: string; _rest: string[] }>) => Promise<void>): SubcommandBuilder<TArgs>;
+  ): SubcommandBuilder<TArgs & { [P in K]: ResolvedParam<T, O> }, TContext>;
+  setPermissions(perms: PermissionConfig): SubcommandBuilder<TArgs, TContext>;
+  setCooldown(seconds: number): SubcommandBuilder<TArgs, TContext>;
+  setExecute(fn: (interaction: TContext, args: SubcommandArgs<TArgs, TContext>) => Promise<void>): SubcommandBuilder<TArgs, TContext>;
   build(): SubcommandDescriptor;
 }
 
+export type SlashSubcommandBuilderResult = SubcommandBuilder<Record<string, unknown>, ChatInputCommandInteraction>;
+export type PrefixSubcommandBuilderResult = SubcommandBuilder<Record<string, unknown>, Message<true>>;
 export type SubcommandBuilderResult = SubcommandBuilder<Record<string, unknown>>;
 
-function makeSubcommandBuilder<TArgs extends Record<string, unknown>>(
+function makeSubcommandBuilder<
+  TArgs extends Record<string, unknown>,
+  TContext extends SubcommandContext = SubcommandContext
+>(
   state: Partial<SubcommandDescriptor>
-): SubcommandBuilder<TArgs> {
+): SubcommandBuilder<TArgs, TContext> {
   return {
     addParam(name, type, opts) {
       const param: ParamDescriptor = {
@@ -454,16 +470,16 @@ function makeSubcommandBuilder<TArgs extends Record<string, unknown>>(
         required: opts?.required ?? false,
         description: opts?.description,
       };
-      return makeSubcommandBuilder({ ...state, params: [...(state.params ?? []), param] }) as any;
+      return makeSubcommandBuilder<TArgs & { [P in typeof name]: ResolvedParam<typeof type, typeof opts> }, TContext>({ ...state, params: [...(state.params ?? []), param] }) as any;
     },
     setPermissions(perms) {
-      return makeSubcommandBuilder({ ...state, permissions: perms });
+      return makeSubcommandBuilder<TArgs, TContext>({ ...state, permissions: perms });
     },
     setCooldown(seconds) {
-      return makeSubcommandBuilder({ ...state, cooldown: seconds });
+      return makeSubcommandBuilder<TArgs, TContext>({ ...state, cooldown: seconds });
     },
     setExecute(fn) {
-      return makeSubcommandBuilder({ ...state, execute: fn as any });
+      return makeSubcommandBuilder<TArgs, TContext>({ ...state, execute: fn as any });
     },
     build(): SubcommandDescriptor {
       return {
@@ -651,7 +667,6 @@ function makeModalBuilder<TFields extends Record<string, unknown>>(
         if (!field.kind || field.kind === 'text') {
         const input = new TextInputBuilder()
           .setCustomId(field.name)
-          .setLabel(field.label ?? field.name)
           .setStyle(field.style === FieldStyle.Paragraph ? TextInputStyle.Paragraph : TextInputStyle.Short)
           .setRequired(field.required);
 
@@ -896,6 +911,14 @@ export function createPrefixCommand(name: string): PrefixCommandBuilder<Record<n
 
 export function createSubcommand(name: string): SubcommandBuilderResult {
   return makeSubcommandBuilder({ name, params: [] });
+}
+
+export function createSlashSubcommand(name: string): SlashSubcommandBuilderResult {
+  return makeSubcommandBuilder<Record<never, never>, ChatInputCommandInteraction>({ name, params: [] });
+}
+
+export function createPrefixSubcommand(name: string): PrefixSubcommandBuilderResult {
+  return makeSubcommandBuilder<Record<never, never>, Message<true>>({ name, params: [] });
 }
 
 export function createButton(customId: string): ButtonBuilder<Record<never, never>> {
