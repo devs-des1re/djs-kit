@@ -104,6 +104,11 @@ test('generates env credentials and project behavior config', async () => {
 
     const builders = await readFile(join(tmp, 'phase-one-bot', 'src', 'builders', 'index.ts'), 'utf-8');
     assert.doesNotMatch(builders, /\n\s+\.setLabel\(field\.label \?\? field\.name\)/);
+    assert.match(builders, /setDescription\(desc: string\): SubcommandBuilder/);
+    assert.match(builders, /description: state\.description/);
+
+    const commandLoader = await readFile(join(tmp, 'phase-one-bot', 'src', 'handlers', 'commandLoader.ts'), 'utf-8');
+    assert.match(commandLoader, /setDescription\(sub\.description \?\? sub\.name\)/);
 
     const customId = await readFile(join(tmp, 'phase-one-bot', 'src', 'lib', 'customId.ts'), 'utf-8');
     assert.match(customId, /createHmac/);
@@ -209,6 +214,13 @@ test('generates a JavaScript project with synced runtime features', async () => 
 
     const serverCommand = await readFile(join(tmp, 'js-bot', 'src', 'commands', 'slash', 'server.js'), 'utf-8');
     assert.match(serverCommand, /createSlashCommand\('server'\)/);
+
+    const builders = await readFile(join(tmp, 'js-bot', 'src', 'builders', 'index.js'), 'utf-8');
+    assert.match(builders, /setDescription\(desc\)/);
+    assert.match(builders, /description: state\.description/);
+
+    const commandLoader = await readFile(join(tmp, 'js-bot', 'src', 'handlers', 'commandLoader.js'), 'utf-8');
+    assert.match(commandLoader, /setDescription\(sub\.description \?\? sub\.name\)/);
 
     const cooldowns = await readFile(join(tmp, 'js-bot', 'src', 'db', 'cooldowns.js'), 'utf-8');
     assert.match(cooldowns, /ioredis/);

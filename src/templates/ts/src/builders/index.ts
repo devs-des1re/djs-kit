@@ -45,8 +45,6 @@ import {
 } from 'discord.js';
 import { ParamType, FieldStyle, SelectType } from './types.js';
 
-// ─── Internal descriptor shapes (consumed by handlers) ───────────────────────
-
 export interface ParamDescriptor {
   name: string;
   type: ParamType;
@@ -58,6 +56,7 @@ export interface ParamDescriptor {
 
 export interface SubcommandDescriptor {
   name: string;
+  description?: string;
   params: ParamDescriptor[];
   permissions?: PermissionConfig;
   cooldown?: number;
@@ -176,8 +175,6 @@ export interface PermissionConfig {
   devOnly?: boolean;
 }
 
-// ─── Type maps ────────────────────────────────────────────────────────────────
-
 type ParamTypeMap = {
   [ParamType.User]: User;
   [ParamType.Member]: GuildMember;
@@ -247,8 +244,6 @@ interface ModalBooleanOptions {
 type ModalFiles = ReadonlyCollection<Snowflake, Attachment> | null;
 type ModalSelectResult = readonly string[];
 type ModalObjectSelectResult = unknown;
-
-// ─── Slash Command Builder ─────────────────────────────────────────────────────
 
 type SlashExecuteFn<TArgs> = (
   interaction: ChatInputCommandInteraction,
@@ -339,8 +334,6 @@ function makeSlashBuilder<TArgs extends Record<string, unknown>>(
   };
 }
 
-// ─── Prefix Command Builder ────────────────────────────────────────────────────
-
 type PrefixExecuteFn<TArgs> = (
   message: Message<true>,
   args: TArgs & { _raw: string; _rest: string[] }
@@ -429,8 +422,6 @@ function makePrefixBuilder<TArgs extends Record<string, unknown>>(
   };
 }
 
-// ─── Subcommand Builder ───────────────────────────────────────────────────────
-
 type SubcommandContext = ChatInputCommandInteraction | Message<true>;
 type SubcommandArgs<TArgs, TContext extends SubcommandContext> =
   TContext extends Message<true>
@@ -441,6 +432,7 @@ export interface SubcommandBuilder<
   TArgs extends Record<string, unknown>,
   TContext extends SubcommandContext = SubcommandContext
 > {
+  setDescription(desc: string): SubcommandBuilder<TArgs, TContext>;
   addParam<K extends string, T extends ParamType, O extends ParamOptions>(
     name: K,
     type: T,
@@ -463,6 +455,9 @@ function makeSubcommandBuilder<
   state: Partial<SubcommandDescriptor>
 ): SubcommandBuilder<TArgs, TContext> {
   return {
+    setDescription(desc) {
+      return makeSubcommandBuilder<TArgs, TContext>({ ...state, description: desc });
+    },
     addParam(name, type, opts) {
       const param: ParamDescriptor = {
         name,
@@ -484,6 +479,7 @@ function makeSubcommandBuilder<
     build(): SubcommandDescriptor {
       return {
         name: state.name!,
+        description: state.description,
         params: state.params ?? [],
         permissions: state.permissions,
         cooldown: state.cooldown,
@@ -492,8 +488,6 @@ function makeSubcommandBuilder<
     },
   };
 }
-
-// ─── Button Builder ───────────────────────────────────────────────────────────
 
 type ButtonExecuteFn<TParams> = (
   interaction: ButtonInteraction,
@@ -530,8 +524,6 @@ function makeButtonBuilder<TParams extends Record<string, string>>(
     },
   };
 }
-
-// ─── Modal Builder ────────────────────────────────────────────────────────────
 
 type ModalExecuteFn<TFields> = (
   interaction: ModalSubmitInteraction,
@@ -782,8 +774,6 @@ function makeModalBuilder<TFields extends Record<string, unknown>>(
   };
 }
 
-// ─── Select Builder ───────────────────────────────────────────────────────────
-
 type SelectValueMap = {
   [SelectType.String]: string;
   [SelectType.User]: User;
@@ -817,8 +807,6 @@ function makeSelectBuilder<T extends SelectType>(state: Partial<SelectDescriptor
   };
 }
 
-// ─── Autocomplete Builder ────────────────────────────────────────────────────
-
 export interface AutocompleteBuilder {
   setExecute(fn: (interaction: AutocompleteInteraction) => Promise<void>): AutocompleteBuilder;
   build(): AutocompleteDescriptor;
@@ -838,8 +826,6 @@ function makeAutocompleteBuilder(state: Partial<AutocompleteDescriptor> & { comm
     },
   };
 }
-
-// ─── Context Menu Builder ────────────────────────────────────────────────────
 
 export interface ContextMenuBuilder {
   setPermissions(perms: PermissionConfig): ContextMenuBuilder;
@@ -871,8 +857,6 @@ function makeContextMenuBuilder(state: Partial<ContextMenuDescriptor> & { name: 
   };
 }
 
-// ─── Event Builder ────────────────────────────────────────────────────────────
-
 export interface EventBuilder<K extends keyof ClientEvents> {
   setOnce(): EventBuilder<K>;
   setExecute(fn: (...args: ClientEvents[K]) => Promise<void>): EventBuilder<K>;
@@ -898,8 +882,6 @@ function makeEventBuilder<K extends keyof ClientEvents>(
     },
   };
 }
-
-// ─── Public API ───────────────────────────────────────────────────────────────
 
 export function createSlashCommand(name: string): SlashCommandBuilder<Record<never, never>> {
   return makeSlashBuilder({ name, commandType: 'slash', params: [], subcommands: [] });

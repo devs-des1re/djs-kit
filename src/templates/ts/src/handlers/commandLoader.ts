@@ -147,7 +147,7 @@ export async function loadCommands(client: Client): Promise<void> {
           builder.addSubcommand(subBuilder => {
             subBuilder
               .setName(sub.name)
-              .setDescription(sub.name);
+              .setDescription(sub.description ?? sub.name);
 
             for (const param of sortedParams(sub.params)) {
               addParamOption(subBuilder, param);

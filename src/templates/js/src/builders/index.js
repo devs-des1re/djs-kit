@@ -123,6 +123,9 @@ function makePrefixBuilder(state) {
 }
 function makeSubcommandBuilder(state) {
     return {
+        setDescription(desc) {
+            return makeSubcommandBuilder({ ...state, description: desc });
+        },
         addParam(name, type, opts) {
             const param = {
                 name,
@@ -144,6 +147,7 @@ function makeSubcommandBuilder(state) {
         build() {
             return {
                 name: state.name,
+                description: state.description,
                 params: state.params ?? [],
                 permissions: state.permissions,
                 cooldown: state.cooldown,
