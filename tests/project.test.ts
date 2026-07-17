@@ -47,6 +47,8 @@ test('generates env credentials and project behavior config', async () => {
     assert.match(config, /componentStateSecret/);
     assert.match(config, /ownerIds: parseList/);
     assert.match(config, /logLevel: 'info'/);
+    assert.match(config, /messages: \{/);
+    assert.match(config, /commandPermissionDenied/);
 
     const runtime = await readFile(join(tmp, 'phase-one-bot', 'src', 'lib', 'runtime.ts'), 'utf-8');
     assert.match(runtime, /unhandledRejection/);
@@ -118,6 +120,9 @@ test('generates env credentials and project behavior config', async () => {
     for (const helper of ['responses.ts', 'embeds.ts', 'pagination.ts', 'confirm.ts', 'guards.ts', 'modLog.ts']) {
       await readFile(join(tmp, 'phase-one-bot', 'src', 'lib', helper), 'utf-8');
     }
+
+    const messages = await readFile(join(tmp, 'phase-one-bot', 'src', 'lib', 'messages.ts'), 'utf-8');
+    assert.match(messages, /formatMessage/);
 
     const ping = await readFile(join(tmp, 'phase-one-bot', 'src', 'commands', 'slash', 'ping.ts'), 'utf-8');
     assert.match(ping, /infoEmbed/);

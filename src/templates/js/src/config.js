@@ -52,4 +52,13 @@ export const config = {
     modAuditChannelId: envResult.data.MOD_AUDIT_CHANNEL_ID,
     totalShards: parseShardCount(envResult.data.DISCORD_TOTAL_SHARDS),
     logLevel: 'info',
+    messages: {
+        commandPermissionDenied: "You don't have permission to use this command. ({reason})",
+        componentPermissionDenied: 'You do not have permission to use this {component}.',
+        commandCooldown: 'Please wait {seconds}s before using this command again.',
+        commandNotImplemented: 'Command logic not implemented.',
+        commandError: 'There was an error while executing this command!',
+        componentInvalidState: '{reason}',
+        componentError: 'There was an error while executing this component!',
+    },
 };

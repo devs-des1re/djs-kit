@@ -4,6 +4,7 @@ import { checkPermissions } from '../lib/permissions.js';
 import { createCooldownStore } from '../lib/cooldowns.js';
 import { parseArgs } from '../lib/argParser.js';
 import { logger } from '../lib/logger.js';
+import { message as configMessage } from '../lib/messages.js';
 
 const cooldowns = await createCooldownStore(config.cooldownBackend);
 
@@ -64,14 +65,14 @@ export function registerCommandHandler(client: Client): void {
       const member = await interaction.guild?.members.fetch(interaction.user.id);
       const accessCheck = checkCommandAccess(interaction.user.id, interaction.guildId, desc.permissions);
       if (!accessCheck.allowed) {
-        await interaction.reply({ content: `You don't have permission to use this command. (${accessCheck.reason})`, ephemeral: true });
+        await interaction.reply({ content: configMessage('commandPermissionDenied', { reason: accessCheck.reason }), ephemeral: true });
         return;
       }
 
       if (member) {
         const permCheck = checkPermissions(member, desc.permissions);
         if (!permCheck.allowed) {
-          await interaction.reply({ content: `You don't have permission to use this command. (${permCheck.reason})`, ephemeral: true });
+          await interaction.reply({ content: configMessage('commandPermissionDenied', { reason: permCheck.reason }), ephemeral: true });
           return;
         }
       }
@@ -80,7 +81,7 @@ export function registerCommandHandler(client: Client): void {
         const cooldownKey = subcommandName ? `${parentDesc.name}.${subcommandName}` : parentDesc.name;
         const msLeft = await cooldowns.check(cooldownKey, interaction.user.id);
         if (msLeft) {
-          await interaction.reply({ content: `Please wait ${(msLeft / 1000).toFixed(1)}s before using this command again.`, ephemeral: true });
+          await interaction.reply({ content: configMessage('commandCooldown', { seconds: (msLeft / 1000).toFixed(1) }), ephemeral: true });
           return;
         }
         await cooldowns.set(cooldownKey, interaction.user.id, desc.cooldown * 1000);
@@ -106,11 +107,11 @@ export function registerCommandHandler(client: Client): void {
       if (desc.execute) {
         await desc.execute(interaction, args);
       } else {
-        await interaction.reply({ content: 'Command logic not implemented.', ephemeral: true });
+        await interaction.reply({ content: configMessage('commandNotImplemented'), ephemeral: true });
       }
     } catch (err) {
       logger.error(`Error executing slash command ${parentDesc.name}.`, err);
-      const msg = { content: 'There was an error while executing this command!', ephemeral: true };
+      const msg = { content: configMessage('commandError'), ephemeral: true };
       if (interaction.replied || interaction.deferred) await interaction.followUp(msg).catch(() => {});
       else await interaction.reply(msg).catch(() => {});
     }
@@ -146,13 +147,13 @@ export function registerCommandHandler(client: Client): void {
 
       const accessCheck = checkCommandAccess(message.author.id, message.guildId, desc.permissions);
       if (!accessCheck.allowed) {
-        await message.reply(`You don't have permission to use this command. (${accessCheck.reason})`);
+        await message.reply(configMessage('commandPermissionDenied', { reason: accessCheck.reason }));
         return;
       }
 
       const permCheck = checkPermissions(message.member!, desc.permissions);
       if (!permCheck.allowed) {
-        await message.reply(`You don't have permission to use this command. (${permCheck.reason})`);
+        await message.reply(configMessage('commandPermissionDenied', { reason: permCheck.reason }));
         return;
       }
 
@@ -160,7 +161,7 @@ export function registerCommandHandler(client: Client): void {
         const key = usedSubcommandName ? `${parentDesc.name}.${usedSubcommandName}` : parentDesc.name;
         const msLeft = await cooldowns.check(key, message.author.id);
         if (msLeft) {
-          await message.reply(`Please wait ${(msLeft / 1000).toFixed(1)}s before using this command again.`);
+          await message.reply(configMessage('commandCooldown', { seconds: (msLeft / 1000).toFixed(1) }));
           return;
         }
         await cooldowns.set(key, message.author.id, desc.cooldown * 1000);
@@ -173,11 +174,11 @@ export function registerCommandHandler(client: Client): void {
       if (desc.execute) {
         await desc.execute(message as any, resolvedArgs);
       } else {
-        await message.reply('Command logic not implemented.');
+        await message.reply(configMessage('commandNotImplemented'));
       }
     } catch (err) {
       logger.error(`Error executing prefix command ${parentDesc.name}.`, err);
-      await message.reply('There was an error while executing this command!').catch(() => {});
+      await message.reply(configMessage('commandError')).catch(() => {});
     }
   });
 }

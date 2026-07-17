@@ -249,7 +249,6 @@ function makeModalBuilder(state) {
                 if (!field.kind || field.kind === 'text') {
                     const input = new TextInputBuilder()
                         .setCustomId(field.name)
-                        .setLabel(field.label ?? field.name)
                         .setStyle(field.style === FieldStyle.Paragraph ? TextInputStyle.Paragraph : TextInputStyle.Short)
                         .setRequired(field.required);
                     if (field.minLength !== undefined)
@@ -451,7 +450,6 @@ function makeEventBuilder(state) {
         },
     };
 }
-// ─── Public API ───────────────────────────────────────────────────────────────
 export function createSlashCommand(name) {
     return makeSlashBuilder({ name, commandType: 'slash', params: [], subcommands: [] });
 }

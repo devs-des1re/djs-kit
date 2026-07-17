@@ -100,6 +100,26 @@ export const config = {
 
 Slash-only mode avoids the privileged Message Content intent for bots that do not need prefix commands.
 
+## Default Messages
+
+Generated projects keep common fallback responses in `src/config.ts`, so you can customize permission, cooldown, and error copy without editing handlers.
+
+```typescript
+export const config = {
+  messages: {
+    commandPermissionDenied: "You don't have permission to use this command. ({reason})",
+    componentPermissionDenied: 'You do not have permission to use this {component}.',
+    commandCooldown: 'Please wait {seconds}s before using this command again.',
+    commandNotImplemented: 'Command logic not implemented.',
+    commandError: 'There was an error while executing this command!',
+    componentInvalidState: '{reason}',
+    componentError: 'There was an error while executing this component!',
+  },
+};
+```
+
+Available placeholders include `{reason}`, `{seconds}`, and `{component}` depending on the message.
+
 ## Autocomplete
 
 ```bash

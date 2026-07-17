@@ -3,12 +3,13 @@ import { parseCustomId } from '../lib/customId.js';
 import { checkPermissions } from '../lib/permissions.js';
 import { SelectType } from '../builders/types.js';
 import { logger } from '../lib/logger.js';
+import { message as configMessage } from '../lib/messages.js';
 async function rejectInvalidState(interaction, parsed) {
     if (parsed.valid)
         return false;
     if (interaction.isRepliable()) {
         await interaction.reply({
-            content: parsed.reason ?? 'This component state is invalid.',
+            content: configMessage('componentInvalidState', { reason: parsed.reason ?? 'This component state is invalid.' }),
             ephemeral: true,
         }).catch(() => { });
     }
@@ -25,7 +26,7 @@ export function registerComponentHandler(client) {
                     return;
                 const member = await interaction.guild?.members.fetch(interaction.user.id);
                 if (member && !checkPermissions(member, desc.permissions).allowed) {
-                    await interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
+                    await interaction.reply({ content: configMessage('componentPermissionDenied', { component: 'command' }), ephemeral: true });
                     return;
                 }
                 if (desc.execute) {
@@ -47,7 +48,7 @@ export function registerComponentHandler(client) {
                     return;
                 const member = await interaction.guild?.members.fetch(interaction.user.id);
                 if (member && !checkPermissions(member, desc.permissions).allowed) {
-                    await interaction.reply({ content: 'You do not have permission to use this button.', ephemeral: true });
+                    await interaction.reply({ content: configMessage('componentPermissionDenied', { component: 'button' }), ephemeral: true });
                     return;
                 }
                 const args = {};
@@ -68,7 +69,7 @@ export function registerComponentHandler(client) {
                     return;
                 const member = await interaction.guild?.members.fetch(interaction.user.id);
                 if (member && !checkPermissions(member, desc.permissions).allowed) {
-                    await interaction.reply({ content: 'You do not have permission to use this modal.', ephemeral: true });
+                    await interaction.reply({ content: configMessage('componentPermissionDenied', { component: 'modal' }), ephemeral: true });
                     return;
                 }
                 const args = {};
@@ -131,7 +132,7 @@ export function registerComponentHandler(client) {
                     return;
                 const member = await interaction.guild?.members.fetch(interaction.user.id);
                 if (member && !checkPermissions(member, desc.permissions).allowed) {
-                    await interaction.reply({ content: 'You do not have permission to use this menu.', ephemeral: true });
+                    await interaction.reply({ content: configMessage('componentPermissionDenied', { component: 'menu' }), ephemeral: true });
                     return;
                 }
                 let resolvedValues = [];
@@ -157,7 +158,7 @@ export function registerComponentHandler(client) {
         catch (err) {
             const cid = 'customId' in interaction ? interaction.customId : 'unknown';
             logger.error(`Error executing component ${cid}.`, err);
-            const msg = { content: 'There was an error while executing this component!', ephemeral: true };
+            const msg = { content: configMessage('componentError'), ephemeral: true };
             if (interaction.isRepliable() && (interaction.replied || interaction.deferred))
                 await interaction.followUp(msg).catch(() => { });
             else if (interaction.isRepliable())
