@@ -2,6 +2,7 @@ import type { GuildMember, PermissionResolvable, RepliableInteraction } from 'di
 import { PermissionsBitField } from 'discord.js';
 import { config } from '../config.js';
 import { safeEphemeral } from './responses.js';
+import { message as configMessage } from './messages.js';
 
 export type GuardResult =
   | { allowed: true }
@@ -10,35 +11,35 @@ export type GuardResult =
 export function guildOnly(interaction: RepliableInteraction): GuardResult {
   return interaction.inGuild()
     ? { allowed: true }
-    : { allowed: false, reason: 'This action can only be used in a server.' };
+    : { allowed: false, reason: configMessage('guardGuildOnly') };
 }
 
 export function ownerOnly(userId: string): GuardResult {
   return config.ownerIds.includes(userId)
     ? { allowed: true }
-    : { allowed: false, reason: 'Bot owner only.' };
+    : { allowed: false, reason: configMessage('guardOwnerOnly') };
 }
 
 export function devGuildOnly(guildId: string | null): GuardResult {
   return guildId && config.devGuildIds.includes(guildId)
     ? { allowed: true }
-    : { allowed: false, reason: 'Development server only.' };
+    : { allowed: false, reason: configMessage('guardDevGuildOnly') };
 }
 
 export function requireUserPermissions(member: GuildMember | null, permissions: PermissionResolvable): GuardResult {
-  if (!member) return { allowed: false, reason: 'Could not resolve your server member record.' };
+  if (!member) return { allowed: false, reason: configMessage('guardMemberRecordNotFound') };
   const bits = PermissionsBitField.resolve(permissions);
   return member.permissions.has(bits)
     ? { allowed: true }
-    : { allowed: false, reason: `Missing user permission: ${new PermissionsBitField(bits).toArray().join(', ')}` };
+    : { allowed: false, reason: configMessage('guardMissingUserPermission', { permissions: new PermissionsBitField(bits).toArray().join(', ') }) };
 }
 
 export function requireBotPermissions(member: GuildMember | null, permissions: PermissionResolvable): GuardResult {
-  if (!member) return { allowed: false, reason: 'Could not resolve my server member record.' };
+  if (!member) return { allowed: false, reason: configMessage('guardBotRecordNotFound') };
   const bits = PermissionsBitField.resolve(permissions);
   return member.permissions.has(bits)
     ? { allowed: true }
-    : { allowed: false, reason: `Missing bot permission: ${new PermissionsBitField(bits).toArray().join(', ')}` };
+    : { allowed: false, reason: configMessage('guardMissingBotPermission', { permissions: new PermissionsBitField(bits).toArray().join(', ') }) };
 }
 
 export async function replyIfBlocked(interaction: RepliableInteraction, result: GuardResult): Promise<boolean> {

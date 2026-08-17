@@ -113,12 +113,33 @@ export const config = {
     commandNotImplemented: 'Command logic not implemented.',
     commandError: 'There was an error while executing this command!',
     componentInvalidState: '{reason}',
+    componentInvalidStateFallback: 'This component state is invalid.',
     componentError: 'There was an error while executing this component!',
+    missingRequiredArgument: 'Missing required argument: `{name}` ({meta})',
+    invalidChoice: 'Invalid choice for `{name}`. Must be one of: {choices}',
+    invalidNumber: 'Invalid number for `{name}`.',
+    invalidBoolean: 'Invalid boolean for `{name}`.',
+    userNotFound: 'Could not find user/member for `{name}`.',
+    channelNotFound: 'Could not find channel for `{name}`.',
+    channelMustBeText: 'Channel `{name}` must be a text channel.',
+    roleNotFound: 'Could not find role for `{name}`.',
+    failedToParseArgument: 'Failed to parse required argument `{name}`.',
+    confirmationConfirmed: 'Confirmed.',
+    confirmationCancelled: 'Cancelled.',
+    confirmationTimedOut: 'Confirmation timed out.',
+    guardGuildOnly: 'This action can only be used in a server.',
+    guardOwnerOnly: 'Bot owner only.',
+    guardDevGuildOnly: 'Development server only.',
+    guardMemberRecordNotFound: 'Could not resolve your server member record.',
+    guardBotRecordNotFound: 'Could not resolve my server member record.',
+    guardMissingUserPermission: 'Missing user permission: {permissions}',
+    guardMissingBotPermission: 'Missing bot permission: {permissions}',
+    paginationNoPages: 'No pages to show.',
   },
 };
 ```
 
-Available placeholders include `{reason}`, `{seconds}`, and `{component}` depending on the message.
+Available placeholders include `{reason}`, `{seconds}`, `{component}`, `{name}`, `{meta}`, `{choices}`, and `{permissions}` depending on the message.
 
 ## Autocomplete
 

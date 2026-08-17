@@ -1,5 +1,22 @@
 import { ParamType } from '../builders/types.js';
-export async function parseArgs(message, tokens, params, guild, consumedTokens) {
+const defaultMessages = {
+    missingRequiredArgument: 'Missing required argument: `{name}` ({meta})',
+    invalidChoice: 'Invalid choice for `{name}`. Must be one of: {choices}',
+    invalidNumber: 'Invalid number for `{name}`.',
+    invalidBoolean: 'Invalid boolean for `{name}`.',
+    userNotFound: 'Could not find user/member for `{name}`.',
+    channelNotFound: 'Could not find channel for `{name}`.',
+    channelMustBeText: 'Channel `{name}` must be a text channel.',
+    roleNotFound: 'Could not find role for `{name}`.',
+    failedToParseArgument: 'Failed to parse required argument `{name}`.',
+};
+function defaultFormat(template, values = {}) {
+    return template.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ''));
+}
+function defaultMessage(key, values = {}) {
+    return defaultFormat(defaultMessages[key], values);
+}
+export async function parseArgs(message, tokens, params, guild, consumedTokens, t = defaultMessage) {
     const args = {};
     const restTokens = [...tokens];
     let rawIndex = 0;
@@ -7,7 +24,7 @@ export async function parseArgs(message, tokens, params, guild, consumedTokens) 
         const param = params[index];
         if (restTokens.length === 0) {
             if (param.required) {
-                await message.reply(`Missing required argument: \`${param.name}\` (${param.description ?? param.type})`);
+                await message.reply(t('missingRequiredArgument', { name: param.name, meta: param.description ?? param.type }));
                 return null;
             }
             args[param.name] = undefined;
@@ -22,7 +39,7 @@ export async function parseArgs(message, tokens, params, guild, consumedTokens) 
                     ? [token, ...restTokens.splice(0)].join(' ')
                     : token;
                 if (param.choices && !param.choices.includes(resolved)) {
-                    await message.reply(`Invalid choice for \`${param.name}\`. Must be one of: ${param.choices.join(', ')}`);
+                    await message.reply(t('invalidChoice', { name: param.name, choices: param.choices.join(', ') }));
                     return null;
                 }
                 break;
@@ -30,7 +47,7 @@ export async function parseArgs(message, tokens, params, guild, consumedTokens) 
                 resolved = parseFloat(token);
                 if (isNaN(resolved)) {
                     if (param.required) {
-                        await message.reply(`Invalid number for \`${param.name}\`.`);
+                        await message.reply(t('invalidNumber', { name: param.name }));
                         return null;
                     }
                     resolved = null;
@@ -42,7 +59,7 @@ export async function parseArgs(message, tokens, params, guild, consumedTokens) 
                 else if (['false', 'no', '0', 'n'].includes(token.toLowerCase()))
                     resolved = false;
                 else if (param.required) {
-                    await message.reply(`Invalid boolean for \`${param.name}\`.`);
+                    await message.reply(t('invalidBoolean', { name: param.name }));
                     return null;
                 }
                 break;
@@ -66,7 +83,7 @@ export async function parseArgs(message, tokens, params, guild, consumedTokens) 
                     }
                 }
                 if (!resolved && param.required) {
-                    await message.reply(`Could not find user/member for \`${param.name}\`.`);
+                    await message.reply(t('userNotFound', { name: param.name }));
                     return null;
                 }
                 break;
@@ -78,11 +95,11 @@ export async function parseArgs(message, tokens, params, guild, consumedTokens) 
                 if (!resolved)
                     resolved = guild.channels.cache.find(c => c.name.toLowerCase() === token.toLowerCase());
                 if (resolved && param.type === ParamType.TextChannel && !resolved.isTextBased()) {
-                    await message.reply(`Channel \`${param.name}\` must be a text channel.`);
+                    await message.reply(t('channelMustBeText', { name: param.name }));
                     return null;
                 }
                 if (!resolved && param.required) {
-                    await message.reply(`Could not find channel for \`${param.name}\`.`);
+                    await message.reply(t('channelNotFound', { name: param.name }));
                     return null;
                 }
                 break;
@@ -93,13 +110,13 @@ export async function parseArgs(message, tokens, params, guild, consumedTokens) 
                 if (!resolved)
                     resolved = guild.roles.cache.find(r => r.name.toLowerCase() === token.toLowerCase());
                 if (!resolved && param.required) {
-                    await message.reply(`Could not find role for \`${param.name}\`.`);
+                    await message.reply(t('roleNotFound', { name: param.name }));
                     return null;
                 }
                 break;
         }
         if (resolved === null && param.required) {
-            await message.reply(`Failed to parse required argument \`${param.name}\`.`);
+            await message.reply(t('failedToParseArgument', { name: param.name }));
             return null;
         }
         args[param.name] = resolved;
