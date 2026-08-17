@@ -9,10 +9,10 @@ const cooldowns = await createCooldownStore(config.cooldownBackend);
 function checkCommandAccess(userId, guildId, permissions = {}) {
     const perms = permissions;
     if (perms.ownerOnly && !config.ownerIds.includes(userId)) {
-        return { allowed: false, reason: 'Bot owner only' };
+        return { allowed: false, reason: configMessage('guardOwnerOnly') };
     }
     if (perms.devOnly && guildId && !config.devGuildIds.includes(guildId)) {
-        return { allowed: false, reason: 'Development server only' };
+        return { allowed: false, reason: configMessage('guardDevGuildOnly') };
     }
     return { allowed: true, reason: null };
 }
@@ -164,7 +164,7 @@ export function registerCommandHandler(client) {
                     await cooldowns.set(key, message.author.id, desc.cooldown * 1000);
                 }
                 const consumedTokens = usedSubcommand ? 2 : 1;
-                const resolvedArgs = await parseArgs(message, args, desc.params, message.guild, consumedTokens);
+                const resolvedArgs = await parseArgs(message, args, desc.params, message.guild, consumedTokens, configMessage);
                 if (!resolvedArgs)
                     return; // Error handled inside parseArgs
                 if (desc.execute) {

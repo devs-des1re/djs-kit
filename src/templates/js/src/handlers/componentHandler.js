@@ -9,7 +9,7 @@ async function rejectInvalidState(interaction, parsed) {
         return false;
     if (interaction.isRepliable()) {
         await interaction.reply({
-            content: configMessage('componentInvalidState', { reason: parsed.reason ?? 'This component state is invalid.' }),
+            content: configMessage('componentInvalidState', { reason: parsed.reason ?? configMessage('componentInvalidStateFallback') }),
             ephemeral: true,
         }).catch(() => { });
     }

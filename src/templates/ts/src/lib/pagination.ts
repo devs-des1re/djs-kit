@@ -10,6 +10,7 @@ import {
   type RepliableInteraction,
 } from 'discord.js';
 import { buildCustomId, parseCustomId } from './customId.js';
+import { message as configMessage } from './messages.js';
 
 export type PageContent = string | EmbedBuilder | APIEmbed;
 
@@ -52,7 +53,7 @@ export async function paginate(
   options: PaginationOptions
 ): Promise<void> {
   if (pages.length === 0) {
-    await interaction.reply({ content: 'No pages to show.', ephemeral: options.ephemeral });
+    await interaction.reply({ content: configMessage('paginationNoPages'), ephemeral: options.ephemeral });
     return;
   }
 

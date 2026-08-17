@@ -8,6 +8,7 @@ import {
   type RepliableInteraction,
 } from 'discord.js';
 import { buildCustomId, parseCustomId } from './customId.js';
+import { message as configMessage } from './messages.js';
 
 export interface ConfirmOptions {
   message: string;
@@ -59,10 +60,10 @@ export async function askForConfirmation(
 
     const parsed = parseCustomId(button.customId, { userId: button.user.id, guildId: button.guildId });
     const confirmed = parsed.params[1] === 'confirm';
-    await button.update({ content: confirmed ? 'Confirmed.' : 'Cancelled.', components: [] });
+    await button.update({ content: confirmed ? configMessage('confirmationConfirmed') : configMessage('confirmationCancelled'), components: [] });
     return confirmed;
   } catch {
-    await interaction.editReply({ content: 'Confirmation timed out.', components: [] }).catch(() => {});
+    await interaction.editReply({ content: configMessage('confirmationTimedOut'), components: [] }).catch(() => {});
     return false;
   }
 }

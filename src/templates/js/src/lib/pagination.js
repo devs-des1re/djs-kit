@@ -1,5 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, } from 'discord.js';
 import { buildCustomId, parseCustomId } from './customId.js';
+import { message as configMessage } from './messages.js';
 function pagePayload(page, components, ephemeral) {
     if (typeof page === 'string')
         return { content: page, components, ephemeral, fetchReply: true };
@@ -24,7 +25,7 @@ function paginationRow(id, index, total, options) {
 }
 export async function paginate(interaction, pages, options) {
     if (pages.length === 0) {
-        await interaction.reply({ content: 'No pages to show.', ephemeral: options.ephemeral });
+        await interaction.reply({ content: configMessage('paginationNoPages'), ephemeral: options.ephemeral });
         return;
     }
     const timeoutMs = options.timeoutMs ?? 60_000;
